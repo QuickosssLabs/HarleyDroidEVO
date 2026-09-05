@@ -21,8 +21,28 @@ Pop's authorship and protocol work.
 
 Original project: https://github.com/stelian42/HarleyDroid
 
-Compiler
---------
+Télécharger l’APK (GitHub Releases)
+-----------------------------------
+
+Les APK ne sont **pas** dans git. Ils sont publiés sur la page Releases :
+
+    https://github.com/QuickosssLabs/HarleyDroidEVO/releases
+
+Publier une nouvelle version :
+
+1. Mettre à jour `versionName` / `versionCode` dans `app/build.gradle` si besoin.
+2. Commit + push sur `main`.
+3. Créer et pousser un tag sémantique :
+
+       git tag v3.0-EVO
+       git push origin v3.0-EVO
+
+4. Le workflow `.github/workflows/release.yml` compile l’APK et crée
+   automatiquement la Release GitHub avec le fichier joint
+   (`HarleyDroidEVO-<tag>-debug.apk`).
+
+Compiler localement
+-------------------
 
 Prérequis : JDK 17+, Android SDK (API 35).
 
