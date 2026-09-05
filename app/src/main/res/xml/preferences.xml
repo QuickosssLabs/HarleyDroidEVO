@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreferenceCompat
+        android:key="emulator"
+        android:title="@string/pref_emulator"
+        android:summary="@string/pref_emulator_summary"
+        android:defaultValue="false"
+        android:disableDependentsState="true" />
+    <ListPreference
+        android:key="busprotocol"
+        android:title="@string/pref_busprotocol"
+        android:summary="@string/pref_busprotocol_summary"
+        android:entries="@array/pref_busprotocol_names"
+        android:entryValues="@array/pref_busprotocol_values"
+        android:defaultValue="j1850"
+        app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        android:key="interfacetype"
+        android:title="@string/pref_interfacetype"
+        android:entries="@array/pref_interfacetype_names"
+        android:entryValues="@array/pref_interfacetype_values"
+        android:defaultValue="elm327"
+        android:dependency="emulator"
+        app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        android:key="bluetoothid"
+        android:title="@string/pref_bluetoothdev"
+        android:dependency="emulator" />
+    <SwitchPreferenceCompat
+        android:key="autoconnect"
+        android:title="@string/pref_autoconnect"
+        android:defaultValue="false" />
+    <SwitchPreferenceCompat
+        android:key="autoreconnect"
+        android:title="@string/pref_autoreconnect"
+        android:defaultValue="false" />
+    <EditTextPreference
+        android:key="reconnectdelay"
+        android:title="@string/pref_reconnectdelay"
+        android:inputType="number"
+        android:dependency="autoreconnect"
+        android:defaultValue="30" />
+    <SwitchPreferenceCompat
+        android:key="logging"
+        android:title="@string/pref_logging"
+        android:defaultValue="false" />
+    <SwitchPreferenceCompat
+        android:key="gps"
+        android:title="@string/pref_gps"
+        android:dependency="logging"
+        android:defaultValue="false" />
+    <SwitchPreferenceCompat
+        android:key="lograw"
+        android:title="@string/pref_lograw"
+        android:dependency="logging"
+        android:defaultValue="false" />
+    <SwitchPreferenceCompat
+        android:key="logunknown"
+        android:title="@string/pref_logunknown"
+        android:dependency="logging"
+        android:defaultValue="false" />
+    <SwitchPreferenceCompat
+        android:key="screenon"
+        android:title="@string/pref_screenon"
+        android:defaultValue="false" />
+    <ListPreference
+        android:key="language"
+        android:title="@string/pref_language"
+        android:summary="@string/pref_language_summary"
+        android:entries="@array/pref_language_names"
+        android:entryValues="@array/pref_language_values"
+        android:defaultValue="system"
+        app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        android:key="unit"
+        android:title="@string/pref_unit"
+        android:entries="@array/pref_unit_names"
+        android:entryValues="@array/pref_unit_values"
+        android:defaultValue="metric"
+        app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        android:key="orientation"
+        android:title="@string/pref_orientation"
+        android:entries="@array/pref_orientation_names"
+        android:entryValues="@array/pref_orientation_values"
+        android:defaultValue="auto"
+        app:useSimpleSummaryProvider="true" />
+</PreferenceScreen>

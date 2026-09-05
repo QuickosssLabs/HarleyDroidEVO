@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- HarleyDroid: Harley Davidson J1850 Data Analyser for Android.
+
+     Copyright (C) 2010-2012 Stelian Pop <stelian@popies.net>
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<resources>
+    
+<string name="app_name">HarleyDroidEVO</string>
+<string name="dashboard_name">HarleyDroidEVO</string>
+<string name="diagnostics_name">Diagnostics</string>
+<string name="settings_name">Préférences</string>
+
+<string name="toast_nobluetooth">Désolé, votre appareil ne supporte pas le Bluetooth</string>
+<string name="toast_errorenablebluetooth">Impossible d\'activer le Bluetooth</string>
+<string name="toast_connecting">Connexion à l\'interface&#8230;</string>
+<string name="toast_errorconnecting">Erreur de connexion à l\'interface</string>
+<string name="toast_connected">Connecté à l\'interface </string>
+<string name="toast_nodata">Pas de données en provenance de l\'interface</string>
+<string name="toast_toomanyerrors">Trop d\'erreurs de communication, abandon&#8230;</string>
+<string name="toast_errorlogging">Impossible d\'écrire les données sur le stockage externe</string>
+<string name="toast_errorat">Erreur de configuration de l\'ELM327</string>
+<string name="toast_autorecon">Reconnexion automatique dans %s secondes</string>
+<string name="toast_can_diag_unsupported">Diagnostics actifs indisponibles en CAN pour l\'instant — utilisez le tableau de bord pour les données live</string>
+<string name="toast_hdi_can_forced_elm">HarleyDroidInterface est réservé au J1850 ; ELM327 utilisé pour le CAN</string>
+
+<string name="rpm_label">RPM:</string>
+<string name="speed_imperial_label">Vitesse (mph):</string>
+<string name="speed_metric_label">Vitesse (km/h):</string>
+<string name="enginetemp_imperial_label">T° moteur (°F):</string>
+<string name="enginetemp_metric_label">T° moteur (°C):</string>
+<string name="fuelgauge_label">Niveau essence:</string>
+<string name="turnsignals_label">Clignotants:</string>
+<string name="neutral_label">Point mort:</string>
+<string name="clutch_label">Embrayage:</string>
+<string name="gear_label">Vitesse:</string>
+<string name="checkengine_label">Erreur moteur:</string>
+<string name="odometer_imperial_label">Distance (miles):</string>
+<string name="odometer_metric_label">Distance (km):</string>
+<string name="fuel_imperial_label">Essence (gal):</string>
+<string name="fuel_metric_label">Essence (ml):</string>
+<string name="fuelavg_imperial_label">Cons. (MPG):</string>
+<string name="fuelavg_metric_label">Cons. (l/100km):</string>
+<string name="fuelinst_imperial_label">Inst. (MPG):</string>
+<string name="fuelinst_metric_label">Inst. (l/100km):</string>
+<string name="vin_label">VIN:</string>
+<string name="ecmpn_label">ECM P/N:</string>
+<string name="ecmcalid_label">Calib. ECM:</string>
+<string name="ecmswlevel_label">Version ECM:</string>
+<string name="currentdtc_label">Défauts\n(courants):</string>
+<string name="historicdtc_label">Défauts\n(historiques):</string>
+
+<string name="connect_label">Connexion</string>
+<string name="disconnect_label">Déconnexion</string>
+<string name="preferences_label">Préférences</string>
+<string name="mode_labelraw">Mode text</string>
+<string name="mode_labelgr">Mode graphique</string>
+<string name="dash_label">Mode tableau de bord</string>
+<string name="diag_label">Mode diagnostic</string>
+<string name="resetcounters_label">RAZ</string>
+<string name="about_label">A propos</string>
+
+<string name="cleardtc_label">Effacer erreurs historiques</string>
+
+<string name="notification_label">HarleyDroidEVO</string>
+<string name="notification_connecting">Connexion en cours&#8230;</string>
+<string name="notification_connected">Connecté</string>
+<string name="notification_polling">Capture en cours&#8230;</string>
+<string name="notification_diagnostics">Réception des données de diagnostic en cours&#8230;</string>
+<string name="notification_autorecon">Reconnexion automatique dans quelques secondes&#8230;</string>
+
+<string name="check_engine">Erreur moteur</string>
+<string name="turn_left">Gauche</string>
+<string name="turn_right">Droite</string>
+<string name="low_fuel">Réservoir vide</string>
+<string name="low_fuel_text">Vide</string>
+
+<string name="pref_emulator">Mode simulation</string>
+<string name="pref_emulator_summary">Données factices J1850 ou CAN — sans moto ni interface Bluetooth</string>
+<string name="pref_busprotocol">Type de bus</string>
+<string name="pref_busprotocol_summary">J1850 (4 pins) ou CAN / HDLAN (6 pins)</string>
+<string-array name="pref_busprotocol_names">
+	<item>"J1850 (4 pins)"</item>
+	<item>"CAN / HDLAN (6 pins)"</item>
+</string-array>
+<string-array name="pref_busprotocol_values">
+	<item>"j1850"</item>
+	<item>"can"</item>
+</string-array>
+<string name="pref_interfacetype">Type d\'interface</string>
+<string-array name="pref_interfacetype_names">
+	<item>"ELM327"</item>
+	<item>"HarleyDroidInterface"</item>
+</string-array>
+<string-array name="pref_interfacetype_values">
+	<item>"elm327"</item>
+	<item>"hdi"</item>
+</string-array>
+<string name="pref_bluetoothdev">Périphérique Bluetooth</string>
+<string name="pref_bluetoothdev_none">(aucun appareil appairé)</string>
+<string name="pref_autoconnect">Connexion automatique au lancement</string>
+<string name="pref_autoreconnect">Reconnexion automatique si déconnexion</string>
+<string name="pref_reconnectdelay">Délai avant reconnexion (secondes)</string>
+<string name="pref_seconds">secondes</string>
+<string name="pref_logging">Enregistrer les données sur le stockage externe</string>
+<string name="pref_gps">Ajouter les coordonnées GPS à la sauvegarde</string>
+<string name="pref_lograw">Ajouter les données brutes du bus à la sauvegarde</string>
+<string name="pref_logunknown">Ajouter les données inconnues du bus à la sauvegarde</string>
+<string name="diag_can_unsupported">Les diagnostics actifs (DTC / VIN) ne sont pas encore disponibles en mode CAN. Utilisez le tableau de bord pour la télémétrie live.</string>
+<string name="pref_screenon">Garder l\'écran activé</string>
+<string name="pref_language">Langue</string>
+<string name="pref_language_summary">Langue d\'affichage de l\'application</string>
+<string-array name="pref_language_names">
+	<item>"Défaut système"</item>
+	<item>"English"</item>
+	<item>"Français"</item>
+</string-array>
+<string-array name="pref_language_values">
+	<item>"system"</item>
+	<item>"en"</item>
+	<item>"fr"</item>
+</string-array>
+<string name="pref_unit">Système d\'unités</string>
+<string-array name="pref_unit_names">
+	<item>"Metrique"</item>
+	<item>"Impérial"</item>
+</string-array>
+<string-array name="pref_unit_values">
+	<item>"metric"</item>
+	<item>"imperial"</item>
+</string-array>
+<string name="pref_orientation">Orientation de l\'écran</string>
+<string-array name="pref_orientation_names">
+	<item>"Automatique"</item>
+	<item>"Portrait"</item>
+	<item>"Paysage"</item>
+	<item>"Portrait inversé"</item>
+	<item>"Paysage inversé"</item>
+</string-array>
+<string-array name="pref_orientation_values">
+	<item>"auto"</item>
+	<item>"portrait"</item>
+	<item>"landscape"</item>
+	<item>"reversePortrait"</item>
+	<item>"reverseLandscape"</item>
+</string-array>
+
+<string name="eula_title">Licence</string>
+<string name="eula_accept">Accepter</string>
+<string name="eula_refuse">Refuser</string>
+
+<string name="about_copyright">&#169; 2010&#8211;2012 Stelian Pop &#8212; HarleyDroid d\'origine (GPL-3.0)</string>
+<string name="about_copyright_evo">&#169; 2026 Quickosss &#8212; HarleyDroidEVO (maintenance / modernisation)</string>
+<string name="about_opensource">HarleyDroidEVO est l\'évolution open source de HarleyDroid (clin d\'œil au moteur EVO Harley). Même licence GPL ; œuvre d\'origine Stelian Pop, poursuivie par Quickosss.</string>
+<string name="about_version">Version:</string>
+<string name="about_unknown">inconnue</string>
+<string name="about_support">Support:</string>
+<string name="about_weburl">github.com/stelian42/HarleyDroid</string>
+<string name="about_notendorsed">HarleyDroidEVO n\'est pas approuvé ou certifié par Harley-Davidson Motor Company.</string>
+<string name="about_needelm327">Cette application nécessite une interface spécifique connectée au bus de diagnostic de la moto.</string>
+<string name="about_ok">OK</string>
+<string name="about_license">Licence</string>
+
+<string name="status_idle">Inactif</string>
+<string name="status_connecting">Connexion…</string>
+<string name="status_connected">Connecté</string>
+<string name="status_polling">Capture</string>
+<string name="status_diagnostics">Diagnostics</string>
+<string name="status_error">Erreur</string>
+<string name="status_error_at">Erreur config ELM327</string>
+<string name="status_nodata">Pas de données</string>
+<string name="status_too_many_errors">Trop d\'erreurs</string>
+<string name="status_reconnect">Reconnexion…</string>
+<string name="export_logs_label">Partager les logs</string>
+<string name="export_logs_none">Aucun fichier de log trouvé</string>
+<string name="export_logs_chooser">Partager un log HarleyDroidEVO</string>
+<string name="privacy_note">HarleyDroidEVO utilise le Bluetooth pour parler à votre interface ELM327, et le GPS uniquement si l\'enregistrement avec GPS est activé.</string>
+<string name="dtc_current_title">Défauts courants</string>
+<string name="dtc_historic_title">Défauts historiques</string>
+<string name="dtc_empty">Aucun</string>
+<string name="vin_tap_hint">Appuyer sur le VIN pour les détails</string>
+
+</resources>

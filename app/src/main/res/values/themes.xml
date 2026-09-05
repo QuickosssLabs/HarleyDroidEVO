@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.HarleyDroid" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/hd_primary</item>
+        <item name="colorOnPrimary">@color/hd_on_primary</item>
+        <item name="colorPrimaryContainer">@color/hd_primary_container</item>
+        <item name="colorSecondary">@color/hd_secondary</item>
+        <item name="android:windowBackground">@color/hd_surface</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
+    <style name="Theme.HarleyDroid.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
+</resources>

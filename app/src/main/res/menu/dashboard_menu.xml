@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/startstop_menu"
+        android:icon="@drawable/ic_menu_play_clip"
+        android:title="@string/connect_label"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/mode_menu"
+        android:icon="@drawable/ic_menu_info_details"
+        android:title="@string/mode_labelraw"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/diag_menu"
+        android:icon="@drawable/ic_menu_diag"
+        android:title="@string/diag_label"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/reset_menu"
+        android:icon="@drawable/ic_menu_clear_playlist"
+        android:title="@string/resetcounters_label" />
+    <item
+        android:id="@+id/export_logs_menu"
+        android:title="@string/export_logs_label" />
+    <item
+        android:id="@+id/preferences_menu"
+        android:icon="@drawable/ic_menu_preferences"
+        android:title="@string/preferences_label" />
+    <item
+        android:id="@+id/about_menu"
+        android:icon="@drawable/ic_menu_help"
+        android:title="@string/about_label" />
+</menu>
