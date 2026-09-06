@@ -14,9 +14,17 @@
 package org.harleydroid
 
 sealed class ConnectionUiState {
+    /** Not linked to interface / simulation. */
     data object Idle : ConnectionUiState()
+    /** Bluetooth / ELM handshake in progress. */
     data object Connecting : ConnectionUiState()
+    /** Link up, waiting for live frames. */
     data object Connected : ConnectionUiState()
+    /** Live capture, engine not running (RPM ≈ 0). */
+    data object EngineOff : ConnectionUiState()
+    /** Live capture, engine running. */
+    data object Running : ConnectionUiState()
+    /** Legacy alias used while starting poll before first RPM sample. */
     data object Polling : ConnectionUiState()
     data object Diagnostics : ConnectionUiState()
     data class Error(val status: Int) : ConnectionUiState()

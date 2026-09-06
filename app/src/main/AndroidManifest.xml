@@ -3,7 +3,10 @@
 
     <uses-feature
         android:name="android.hardware.bluetooth"
-        android:required="true" />
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
 
     <uses-permission
         android:name="android.permission.BLUETOOTH"
@@ -15,6 +18,8 @@
     <uses-permission
         android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -35,13 +40,16 @@
         android:icon="@drawable/ic_launcher_harleydroid"
         android:label="@string/app_name"
         android:localeConfig="@xml/locales_config"
-        android:theme="@style/Theme.HarleyDroid">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:theme="@style/Theme.HarleyDroid"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".HarleyDroidDashboard"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:label="@string/dashboard_name"
+            android:launchMode="singleTop"
             android:screenOrientation="unspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -54,6 +62,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:label="@string/diagnostics_name"
+            android:launchMode="singleTop"
             android:screenOrientation="unspecified" />
 
         <activity

@@ -4,54 +4,124 @@
     android:id="@+id/shell_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/hd_surface"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/hd_toolbar">
+        android:background="@color/hd_toolbar"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/Theme.HarleyDroid.AppBarOverlay"
-            app:contentInsetStart="16dp"
-            app:contentInsetStartWithNavigation="16dp"
+            app:contentInsetStart="@dimen/space_8"
+            app:contentInsetStartWithNavigation="@dimen/space_8"
             app:popupTheme="@style/Theme.HarleyDroid.PopupOverlay"
             app:titleTextColor="@color/hd_on_surface">
 
+            <!-- Brand cluster: logo + title + status (status stays next to title) -->
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingEnd="@dimen/space_8">
+
+                <FrameLayout
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/bg_logo_plate"
+                    android:padding="2dp">
+
+                    <ImageView
+                        android:id="@+id/toolbar_logo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/app_name"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_logo_mark" />
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/toolbar_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_8"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Value"
                     android:textColor="@color/hd_on_surface" />
 
-                <View
-                    android:id="@+id/status_dot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/bg_status_dot"
-                    android:contentDescription="@string/status_idle"
+                <LinearLayout
+                    android:id="@+id/status_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_12"
+                    android:background="@drawable/bg_status_pill"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:minHeight="44dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/space_8"
+                    android:paddingEnd="@dimen/space_8"
+                    android:visibility="visible">
+
+                    <View
+                        android:id="@+id/status_dot"
+                        android:layout_width="@dimen/status_dot"
+                        android:layout_height="@dimen/status_dot"
+                        android:background="@drawable/bg_status_dot"
+                        android:contentDescription="@string/status_idle" />
+
+                    <TextView
+                        android:id="@+id/status_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/space_8"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/status_idle"
+                        android:textAppearance="@style/TextAppearance.HarleyDroid.Label"
+                        android:textColor="@color/hd_on_surface_80" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/sim_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/space_8"
+                    android:background="@drawable/bg_sim_pill"
+                    android:clickable="true"
+                    android:contentDescription="@string/badge_simulation_desc"
+                    android:focusable="true"
+                    android:minHeight="28dp"
+                    android:gravity="center"
+                    android:text="@string/badge_simulation"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Label"
+                    android:textColor="@color/hd_status_busy"
+                    android:textAllCaps="true"
                     android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.appbar.MaterialToolbar>
+
+        <View
+            android:id="@+id/toolbar_accent"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="?attr/colorPrimary"
+            android:alpha="0.85" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@color/hd_surface" />
 </LinearLayout>

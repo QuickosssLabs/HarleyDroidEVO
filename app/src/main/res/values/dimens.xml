@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 8-point grid -->
+    <dimen name="space_4">4dp</dimen>
+    <dimen name="space_8">8dp</dimen>
+    <dimen name="space_12">12dp</dimen>
+    <dimen name="space_16">16dp</dimen>
+    <dimen name="space_24">24dp</dimen>
+    <dimen name="space_32">32dp</dimen>
+
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_pill">24dp</dimen>
+
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="tap_min">48dp</dimen>
+    <dimen name="status_dot">10dp</dimen>
+    <dimen name="elevation_card">2dp</dimen>
+
+    <!-- Max 4 type sizes: label, body, value, hero -->
+    <dimen name="text_label">12sp</dimen>
+    <dimen name="text_body">14sp</dimen>
+    <dimen name="text_value">18sp</dimen>
+    <dimen name="text_hero">28sp</dimen>
+
+    <!-- Dashboard text mode (overridden by screen-size buckets) -->
+    <dimen name="textsize">18sp</dimen>
+    <dimen name="textsize_label">13sp</dimen>
+</resources>

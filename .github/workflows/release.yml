@@ -46,8 +46,19 @@ jobs:
 
             APK prêt à installer (sideload). Sur Android : autoriser l’installation depuis des sources inconnues / le navigateur, puis ouvrir le fichier.
 
+            ### Highlights
+
+            - UI Material 3 : thème sombre, branding, status pills, cartes diagnostics
+            - Jauges modernisées (cadrans + LCD) et barres verticales FUEL / TEMP
+            - Self-test cluster à la connexion + mode simulation (`SIM`)
+            - Thèmes de couleur et choix de langue (EN / FR)
+            - Bus dual J1850 (4 pins) + CAN / HDLAN (6 pins, télémétrie passive)
+            - Captures : voir [README.md](https://github.com/QuickosssLabs/HarleyDroidEVO/blob/main/README.md#screenshots)
+
+            ### Build
+
             - Licence : GPL-3.0 (voir `COPYING`)
             - Build : `assembleDebug` (clé de signature debug — usage communautaire / test)
-            - Sources et notes de build : voir `README` et `BUILD.md`
+            - Sources et notes : `README.md`, `BUILD.md`, `RELEASE_NOTES.md`
 
             Dérivé de [stelian42/HarleyDroid](https://github.com/stelian42/HarleyDroid).

@@ -16,6 +16,14 @@
         android:defaultValue="j1850"
         app:useSimpleSummaryProvider="true" />
     <ListPreference
+        android:key="connectiontransport"
+        android:title="@string/pref_connectiontransport"
+        android:summary="@string/pref_connectiontransport_summary"
+        android:entries="@array/pref_connectiontransport_names"
+        android:entryValues="@array/pref_connectiontransport_values"
+        android:defaultValue="bluetooth"
+        android:dependency="emulator" />
+    <ListPreference
         android:key="interfacetype"
         android:title="@string/pref_interfacetype"
         android:entries="@array/pref_interfacetype_names"
@@ -27,6 +35,20 @@
         android:key="bluetoothid"
         android:title="@string/pref_bluetoothdev"
         android:dependency="emulator" />
+    <EditTextPreference
+        android:key="wifi_host"
+        android:title="@string/pref_wifi_host"
+        android:summary="@string/pref_wifi_host_summary"
+        android:defaultValue="192.168.0.10"
+        android:dependency="emulator"
+        android:inputType="textUri" />
+    <EditTextPreference
+        android:key="wifi_port"
+        android:title="@string/pref_wifi_port"
+        android:summary="@string/pref_wifi_port_summary"
+        android:defaultValue="35000"
+        android:dependency="emulator"
+        android:inputType="number" />
     <SwitchPreferenceCompat
         android:key="autoconnect"
         android:title="@string/pref_autoconnect"
@@ -64,6 +86,14 @@
         android:key="screenon"
         android:title="@string/pref_screenon"
         android:defaultValue="false" />
+    <ListPreference
+        android:key="colortheme"
+        android:title="@string/pref_colortheme"
+        android:summary="@string/pref_colortheme_summary"
+        android:entries="@array/pref_colortheme_names"
+        android:entryValues="@array/pref_colortheme_values"
+        android:defaultValue="orange"
+        app:useSimpleSummaryProvider="true" />
     <ListPreference
         android:key="language"
         android:title="@string/pref_language"

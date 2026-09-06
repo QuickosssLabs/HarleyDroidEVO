@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +36,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import com.google.android.material.button.MaterialButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,12 +57,14 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 	private HarleyDroidDiagnosticsViewHandler mHandler;
 
 	// Views references cached for performance
-	private Button mViewVIN;
+	private MaterialButton mViewVIN;
 	private TextView mViewECMPN;
 	private TextView mViewECMCalID;
 	private TextView mViewECMSWLevel;
 	private ListView mViewCurrentDTC;
 	private ListView mViewHistoricDTC;
+	private int mInstalledLayoutRes = 0;
+	private boolean mInstalledPortrait;
 
 	public HarleyDroidDiagnosticsView(Activity activity) {
 		mActivity = activity;
@@ -81,22 +84,31 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 	public void changeView(boolean portrait) {
 		if (D) Log.d(TAG, "changeView portrait=" + portrait);
 
-		int view = R.layout.portrait_graphic;
+		int view = portrait ? R.layout.portrait_diag : R.layout.landscape_diag;
 
-		if (portrait)
-			view = R.layout.portrait_diag;
-		else
-			view = R.layout.landscape_diag;
+		ViewGroup container = mActivity.findViewById(R.id.content_container);
+		boolean contentReady = container != null && container.getChildCount() > 0
+				&& mInstalledLayoutRes == view
+				&& mInstalledPortrait == portrait;
+		if (contentReady) {
+			return;
+		}
+
+		mInstalledLayoutRes = view;
+		mInstalledPortrait = portrait;
 		installContent(view);
 
-		mViewVIN = (Button) mActivity.findViewById(R.id.vin_field);
+		mViewVIN = (MaterialButton) mActivity.findViewById(R.id.vin_field);
 		mViewECMPN = (TextView) mActivity.findViewById(R.id.ecmpn_field);
 		mViewECMCalID = (TextView) mActivity.findViewById(R.id.ecmcalid_field);
 		mViewECMSWLevel = (TextView) mActivity.findViewById(R.id.ecmswlevel_field);
 		mViewCurrentDTC = (ListView) mActivity.findViewById(R.id.currentdtc_field);
 		mViewHistoricDTC = (ListView) mActivity.findViewById(R.id.historicdtc_field);
 
+		mViewVIN.setSoundEffectsEnabled(false);
 		mViewVIN.setOnClickListener(this);
+		mViewCurrentDTC.setSoundEffectsEnabled(false);
+		mViewHistoricDTC.setSoundEffectsEnabled(false);
 		mViewCurrentDTC.setOnItemClickListener(this);
 		mViewHistoricDTC.setOnItemClickListener(this);
 	}
@@ -271,6 +283,7 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 		private final WeakReference<HarleyDroidDiagnosticsView> mHarleyDroidDiagnosticsView;
 
 	    HarleyDroidDiagnosticsViewHandler(HarleyDroidDiagnosticsView harleyDroidDiagnosticsView) {
+	        super(Looper.getMainLooper());
 	        mHarleyDroidDiagnosticsView = new WeakReference<HarleyDroidDiagnosticsView>(harleyDroidDiagnosticsView);
 	    }
 

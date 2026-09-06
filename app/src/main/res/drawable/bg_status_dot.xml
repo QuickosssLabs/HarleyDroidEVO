@@ -3,6 +3,6 @@
     android:shape="oval">
     <solid android:color="@color/hd_status_ok" />
     <size
-        android:width="10dp"
-        android:height="10dp" />
+        android:width="@dimen/status_dot"
+        android:height="@dimen/status_dot" />
 </shape>

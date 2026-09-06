@@ -1,148 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     HarleyDroid: Harley Davidson J1850 Data Analyser for Android.
-
-     Copyright (C) 2010-2012 Stelian Pop <stelian@popies.net>
-
-     This program is free software: you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
-
-     This program is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
-
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/diag_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:background="@color/hd_surface"
+    android:orientation="vertical"
+    android:padding="@dimen/space_16">
 
-    <TableLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/diag1_layout"
+        style="@style/Widget.HarleyDroid.Card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:stretchColumns="1" >
+        app:contentPadding="@dimen/space_16">
 
-        <TableRow android:layout_weight="1" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="4">
 
-            <TextView
-                android:id="@+id/vin_label"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:text="@string/vin_label"
-                android:textSize="@dimen/textsize" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.4"
+                android:orientation="vertical"
+                android:paddingEnd="@dimen/space_12">
 
-            <Button
-                android:id="@+id/vin_field"
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical|left"
-                android:textSize="@dimen/textsize" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/vin_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/vin_label"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Label" />
 
-        <TableRow android:layout_weight="1" >
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/vin_field"
+                    style="@style/Widget.HarleyDroid.VinButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/ecmpn_label"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:text="@string/ecmpn_label"
-                android:textSize="@dimen/textsize" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:orientation="vertical"
+                android:paddingEnd="@dimen/space_8">
 
-            <TextView
-                android:id="@+id/ecmpn_field"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:textSize="@dimen/textsize" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/ecmpn_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ecmpn_label"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Label" />
 
-        <TableRow android:layout_weight="1" >
+                <TextView
+                    android:id="@+id/ecmpn_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Value" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/ecmcalid_label"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:text="@string/ecmcalid_label"
-                android:textSize="@dimen/textsize" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.9"
+                android:orientation="vertical"
+                android:paddingEnd="@dimen/space_8">
 
-            <TextView
-                android:id="@+id/ecmcalid_field"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:textSize="@dimen/textsize" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/ecmcalid_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ecmcalid_label"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Label" />
 
-        <TableRow android:layout_weight="1" >
+                <TextView
+                    android:id="@+id/ecmcalid_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Value" />
+            </LinearLayout>
 
-            <TextView
-                android:id="@+id/ecmswlevel_label"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:text="@string/ecmswlevel_label"
-                android:textSize="@dimen/textsize" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/ecmswlevel_field"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="3dip"
-                android:textSize="@dimen/textsize" />
-        </TableRow>
-    </TableLayout>
+                <TextView
+                    android:id="@+id/ecmswlevel_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ecmswlevel_label"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Label" />
+
+                <TextView
+                    android:id="@+id/ecmswlevel_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.HarleyDroid.Value" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/dtc_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/space_16"
+        android:layout_weight="1"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/currentdtc_label"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/space_8"
             android:layout_weight="1"
-            android:padding="3dip"
-            android:text="@string/currentdtc_label"
-            android:textSize="@dimen/textsize" />
+            android:background="@drawable/bg_section_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_12">
 
-        <ListView
-            android:id="@+id/currentdtc_field"
+            <TextView
+                android:id="@+id/currentdtc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_8"
+                android:text="@string/dtc_current_title"
+                android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+
+            <ListView
+                android:id="@+id/currentdtc_field"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/hd_divider"
+                android:dividerHeight="1dp" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" >
-        </ListView>
-
-        <TextView
-            android:id="@+id/historicdtc_label"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/space_8"
             android:layout_weight="1"
-            android:padding="3dip"
-            android:text="@string/historicdtc_label"
-            android:textSize="@dimen/textsize" />
+            android:background="@drawable/bg_section_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_12">
 
-        <ListView
-            android:id="@+id/historicdtc_field"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" >
-        </ListView>
+            <TextView
+                android:id="@+id/historicdtc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_8"
+                android:text="@string/dtc_historic_title"
+                android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+
+            <ListView
+                android:id="@+id/historicdtc_field"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/hd_divider"
+                android:dividerHeight="1dp" />
+        </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>

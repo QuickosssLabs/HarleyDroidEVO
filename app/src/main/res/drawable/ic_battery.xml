@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Alternator / charge: lightning bolt -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M26,4L12,26h8l-2,18 18,-26h-9l7,-14z" />
+</vector>

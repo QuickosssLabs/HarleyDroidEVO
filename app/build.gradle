@@ -11,8 +11,8 @@ android {
         applicationId "org.harleydroid"
         minSdk 21
         targetSdk 35
-        versionCode 10
-        versionName "3.0-EVO"
+        versionCode 11
+        versionName "3.1-EVO"
     }
 
     compileOptions {

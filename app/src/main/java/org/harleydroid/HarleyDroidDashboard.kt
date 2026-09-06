@@ -26,15 +26,36 @@ class HarleyDroidDashboard : HarleyDroid() {
     private lateinit var dashboardView: HarleyDroidDashboardView
     private var viewMode = HarleyDroidDashboardView.VIEW_GRAPHIC
 
+    /** Watches RPM to refine toolbar status (engine off vs running). */
+    private val engineStateWatcher = object : HarleyDataDashboardListener {
+        override fun onRPMChanged(rpm: Int) {
+            connectionViewModel.reportEngineRpm(rpm)
+        }
+        override fun onSpeedImperialChanged(speed: Int) {}
+        override fun onSpeedMetricChanged(speed: Int) {}
+        override fun onEngineTempImperialChanged(engineTemp: Int) {}
+        override fun onEngineTempMetricChanged(engineTemp: Int) {}
+        override fun onFuelGaugeChanged(full: Int, low: Boolean) {}
+        override fun onTurnSignalsChanged(turnSignals: Int) {}
+        override fun onNeutralChanged(neutral: Boolean) {}
+        override fun onClutchChanged(clutch: Boolean) {}
+        override fun onGearChanged(gear: Int) {}
+        override fun onCheckEngineChanged(checkEngine: Boolean) {}
+        override fun onOdometerImperialChanged(odometer: Int) {}
+        override fun onOdometerMetricChanged(odometer: Int) {}
+        override fun onFuelImperialChanged(fuel: Int) {}
+        override fun onFuelMetricChanged(fuel: Int) {}
+        override fun onFuelAverageImperialChanged(fuel: Int) {}
+        override fun onFuelAverageMetricChanged(fuel: Int) {}
+        override fun onFuelInstantImperialChanged(fuel: Int) {}
+        override fun onFuelInstantMetricChanged(fuel: Int) {}
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupShell(R.string.dashboard_name)
         dashboardView = HarleyDroidDashboardView(this)
-        dashboardView.changeView(
-            viewMode,
-            resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT,
-            mUnitMetric
-        )
+        // Inflate once in onStart with prefs (avoid double gauge bitmap build = long splash)
     }
 
     override fun onStart() {
@@ -69,11 +90,12 @@ class HarleyDroidDashboard : HarleyDroid() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.dashboard_menu, menu)
         MenuCompat.setGroupDividerEnabled(menu, true)
+        stripToolbarClickEffects()
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.startstop_menu)?.isEnabled = mBluetoothID != null || isEmulatorMode()
+        // Keep ▶ always tappable so first-time users get guidance instead of a dead button.
         if (mService != null) {
             menu.findItem(R.id.startstop_menu)?.setIcon(R.drawable.ic_menu_stop)
             menu.findItem(R.id.startstop_menu)?.setTitle(R.string.disconnect_label)
@@ -85,13 +107,13 @@ class HarleyDroidDashboard : HarleyDroid() {
             if (viewMode == HarleyDroidDashboardView.VIEW_GRAPHIC) R.string.mode_labelraw
             else R.string.mode_labelgr
         )
-        return true
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.startstop_menu -> {
-                if (mService == null) ensureConnectPermissions(true) else stopHDS()
+                if (mService == null) requestConnect() else stopHDS()
                 return true
             }
             R.id.mode_menu -> {
@@ -108,7 +130,10 @@ class HarleyDroidDashboard : HarleyDroid() {
                 return true
             }
             R.id.diag_menu -> {
-                startActivity(Intent(this, HarleyDroidDiagnostics::class.java))
+                startActivity(
+                    Intent(this, HarleyDroidDiagnostics::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                )
                 return true
             }
             R.id.preferences_menu -> {
@@ -133,16 +158,25 @@ class HarleyDroidDashboard : HarleyDroid() {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun detachHarleyDataListeners() {
+        mHD?.removeHarleyDataDashboardListener(dashboardView)
+        mHD?.removeHarleyDataDashboardListener(engineStateWatcher)
+        dashboardView.cancelClusterSelfTest()
+    }
+
     override fun onServiceConnected(name: android.content.ComponentName?, service: android.os.IBinder?) {
         super.onServiceConnected(name, service)
-        if (mService?.isPolling != true) mService?.startPoll()
+        val alreadyPolling = mService?.isPolling == true
+        if (!alreadyPolling) mService?.startPoll()
         mHD?.addHarleyDataDashboardListener(dashboardView)
-        dashboardView.drawAll(mHD)
+        mHD?.addHarleyDataDashboardListener(engineStateWatcher)
         connectionViewModel.setState(ConnectionUiState.Polling)
+        // Self-test only when poll actually starts — not on every Settings return.
+        if (!alreadyPolling) dashboardView.startClusterSelfTest(mHD)
     }
 
     override fun onServiceDisconnected(name: android.content.ComponentName?) {
-        mHD?.removeHarleyDataDashboardListener(dashboardView)
+        detachHarleyDataListeners()
         dashboardView.drawAll(null)
         super.onServiceDisconnected(name)
     }

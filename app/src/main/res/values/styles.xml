@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Typography: 1 family, 4 sizes, 2 weights -->
+    <style name="TextAppearance.HarleyDroid.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">@dimen/textsize_label</item>
+        <item name="android:textColor">@color/hd_on_surface_60</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+
+    <style name="TextAppearance.HarleyDroid.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">@color/hd_on_surface_80</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.HarleyDroid.Value" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">@dimen/textsize</item>
+        <item name="android:textColor">@color/hd_on_surface</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <style name="TextAppearance.HarleyDroid.Hero" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">@dimen/text_hero</item>
+        <item name="android:textColor">@color/hd_on_surface</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.HarleyDroid.Section" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="Widget.HarleyDroid" parent="android:Widget" />
+
+    <style name="Widget.HarleyDroid.MetricLabel" parent="Widget.HarleyDroid">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:paddingStart">@dimen/space_12</item>
+        <item name="android:paddingEnd">@dimen/space_8</item>
+        <item name="android:paddingTop">@dimen/space_4</item>
+        <item name="android:paddingBottom">@dimen/space_4</item>
+        <item name="android:textAppearance">@style/TextAppearance.HarleyDroid.Label</item>
+        <item name="android:maxLines">2</item>
+    </style>
+
+    <style name="Widget.HarleyDroid.MetricValue" parent="Widget.HarleyDroid">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_vertical|end</item>
+        <item name="android:paddingStart">@dimen/space_8</item>
+        <item name="android:paddingEnd">@dimen/space_16</item>
+        <item name="android:paddingTop">@dimen/space_4</item>
+        <item name="android:paddingBottom">@dimen/space_4</item>
+        <item name="android:textAppearance">@style/TextAppearance.HarleyDroid.Value</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="Widget.HarleyDroid.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/hd_surface_card</item>
+        <item name="cardCornerRadius">@dimen/radius_md</item>
+        <item name="cardElevation">@dimen/elevation_card</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="contentPadding">@dimen/card_padding</item>
+    </style>
+
+    <style name="Widget.HarleyDroid.VinButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:minHeight">@dimen/tap_min</item>
+        <item name="android:gravity">center_vertical|start</item>
+        <item name="android:textAppearance">@style/TextAppearance.HarleyDroid.Value</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+</resources>

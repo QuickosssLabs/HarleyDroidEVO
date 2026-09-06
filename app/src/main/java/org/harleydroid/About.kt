@@ -27,7 +27,6 @@ object About {
             .setView(view)
             .setPositiveButton(R.string.about_ok, null)
             .setNeutralButton(R.string.about_license) { _, _ -> Eula.show(activity, true) }
-            .setIcon(R.drawable.ic_launcher_harleydroid)
             .create()
         dialog.show()
         try {

@@ -39,7 +39,9 @@ Publier une nouvelle version :
 
 4. Le workflow `.github/workflows/release.yml` compile l’APK et crée
    automatiquement la Release GitHub avec le fichier joint
-   (`HarleyDroidEVO-<tag>-debug.apk`).
+   (`HarleyDroidEVO-<tag>-debug.apk`). Le corps de release reprend les
+   highlights UI / jauges ; le détail est dans `RELEASE_NOTES.md` et
+   `README.md`.
 
 Compiler localement
 -------------------
@@ -59,8 +61,11 @@ Fonctionnalités EVO
 -------------------
 
 - Modernisation Android : targetSdk / compileSdk 35, minSdk 21, JDK 17
-- UI Material 3 (toolbar, thème, réglages PreferenceFragmentCompat)
-- Jauges graphiques historiques conservées
+- UI Material 3 sombre (toolbar, status pills, cartes, dialogues)
+- Jauges modernisées : cadrans + LCD, MiniBarGauge FUEL/TEMP, pastille rapport
+- Self-test cluster (balayage aiguilles + lampes) à la connexion
+- Thèmes de couleur (Orange, Amber, Crimson, Teal, Blue, Green, Silver)
+- Langue : système / English / Français
 - Bluetooth : SPP UUID puis fallback réflexion
 - Permissions différées (BT à la connexion, GPS si logging GPS)
 - Export / partage des logs (.log.gz) via FileProvider
@@ -68,7 +73,7 @@ Fonctionnalités EVO
 - Mode simulation : option dans Préférences (données J1850 ou CAN factices, sans moto)
 - Bus dual : J1850 (4 pins) ou CAN / HDLAN (6 pins) — choix dans Préférences
 - Strings FR / EN pour les nouvelles options
-- Détails protocole et changelog : voir README
+- Captures d’écran : `docs/screenshots/` — détails protocole : voir README.md
 
 Bus J1850 / CAN
 ---------------
@@ -102,7 +107,7 @@ Trames J1850 connues (extrait)
     a8 69 10 06 xx xx : odomètre
     a8 83 10 0a xx xx : conso carburant
 
-Voir README pour la liste complète et le format de log CSV.
+Voir README.md pour la liste complète et le format de log CSV.
 
 Licence : GPL v3 (COPYING).
 Auteur d’origine : Stelian Pop.

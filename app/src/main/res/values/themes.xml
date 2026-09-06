@@ -1,17 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.HarleyDroid" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/hd_primary</item>
+        <item name="colorPrimary">@color/hd_accent_orange</item>
         <item name="colorOnPrimary">@color/hd_on_primary</item>
-        <item name="colorPrimaryContainer">@color/hd_primary_container</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_orange_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_orange</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_orange_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_orange_readout</item>
         <item name="colorSecondary">@color/hd_secondary</item>
+        <item name="colorOnSecondary">@color/hd_on_surface</item>
+        <item name="colorSurface">@color/hd_surface</item>
+        <item name="colorOnSurface">@color/hd_on_surface</item>
+        <item name="colorSurfaceVariant">@color/hd_surface_elevated</item>
+        <item name="colorOnSurfaceVariant">@color/hd_on_surface_60</item>
+        <item name="colorOutline">@color/hd_outline</item>
+        <item name="android:colorBackground">@color/hd_surface</item>
         <item name="android:windowBackground">@color/hd_surface</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.HarleyDroid.MaterialAlertDialog</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.HarleyDroid</item>
+        <item name="toolbarStyle">@style/Widget.HarleyDroid.Toolbar</item>
+
+        <!-- Zero click feedback / transitions — animations + system clicks felt like lag -->
+        <item name="android:soundEffectsEnabled">false</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+        <item name="actionBarItemBackground">@drawable/bg_no_press</item>
+        <item name="selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="android:selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/bg_no_press</item>
+        <item name="android:selectableItemBackgroundBorderless">@drawable/bg_no_press</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="motionDurationShort1">@integer/hd_motion_none</item>
+        <item name="motionDurationShort2">@integer/hd_motion_none</item>
+        <item name="motionDurationShort3">@integer/hd_motion_none</item>
+        <item name="motionDurationShort4">@integer/hd_motion_none</item>
+        <item name="motionDurationMedium1">@integer/hd_motion_none</item>
+        <item name="motionDurationMedium2">@integer/hd_motion_none</item>
+        <item name="motionDurationMedium3">@integer/hd_motion_none</item>
+        <item name="motionDurationMedium4">@integer/hd_motion_none</item>
+        <item name="motionDurationLong1">@integer/hd_motion_none</item>
+        <item name="motionDurationLong2">@integer/hd_motion_none</item>
+        <item name="motionDurationLong3">@integer/hd_motion_none</item>
+        <item name="motionDurationLong4">@integer/hd_motion_none</item>
+        <item name="motionDurationExtraLong1">@integer/hd_motion_none</item>
+        <item name="motionDurationExtraLong2">@integer/hd_motion_none</item>
+        <item name="motionDurationExtraLong3">@integer/hd_motion_none</item>
+        <item name="motionDurationExtraLong4">@integer/hd_motion_none</item>
     </style>
 
-    <style name="Theme.HarleyDroid.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar" />
-    <style name="Theme.HarleyDroid.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
+    <style name="Theme.HarleyDroid.Amber" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_amber</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_amber_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_amber</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_amber_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_amber_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.Crimson" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_crimson</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_crimson_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_crimson</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_crimson_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_crimson_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.Teal" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_teal</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_teal_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_teal</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_teal_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_teal_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.Blue" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_blue</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_blue_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_blue</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_blue_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_blue_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.Green" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_green</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_green_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_green</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_green_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_green_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.Silver" parent="Theme.HarleyDroid">
+        <item name="colorPrimary">@color/hd_accent_silver</item>
+        <item name="colorPrimaryContainer">@color/hd_accent_silver_container</item>
+        <item name="colorOnPrimaryContainer">@color/hd_accent_silver</item>
+        <item name="hdColorAccentSoft">@color/hd_accent_silver_soft</item>
+        <item name="hdColorGaugeReadout">@color/hd_accent_silver_readout</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar">
+        <item name="actionBarItemBackground">@drawable/bg_no_press</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+        <item name="selectableItemBackgroundBorderless">@drawable/bg_no_press</item>
+        <item name="android:selectableItemBackgroundBorderless">@drawable/bg_no_press</item>
+    </style>
+
+    <style name="Theme.HarleyDroid.PopupOverlay" parent="ThemeOverlay.Material3.Dark">
+        <item name="selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="android:selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+    </style>
+
+    <style name="Widget.HarleyDroid.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">@color/hd_toolbar</item>
+        <item name="titleTextColor">@color/hd_on_surface</item>
+        <item name="subtitleTextColor">@color/hd_on_surface_60</item>
+    </style>
+
+    <style name="ThemeOverlay.HarleyDroid.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <!-- Do not set colorPrimary to ?attr/colorPrimary: self-reference breaks ThemeEnforcement. -->
+        <!-- Title/body styles must parent Material alert dialog widgets (they supply layout_*). -->
+        <item name="colorSurface">@color/hd_surface_elevated</item>
+        <item name="colorOnSurface">@color/hd_on_surface</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.HarleyDroid.Title.Text</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.HarleyDroid.Body.Text</item>
+    </style>
+
+    <style name="MaterialAlertDialog.HarleyDroid.Title.Text" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.HarleyDroid.Value</item>
+        <item name="android:textColor">@color/hd_on_surface</item>
+    </style>
+
+    <style name="MaterialAlertDialog.HarleyDroid.Body.Text" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textAppearance">@style/TextAppearance.HarleyDroid.Body</item>
+        <item name="android:textColor">@color/hd_on_surface_80</item>
+    </style>
+
+    <style name="PreferenceThemeOverlay.HarleyDroid" parent="PreferenceThemeOverlay">
+        <item name="android:textColorPrimary">@color/hd_on_surface</item>
+        <item name="android:textColorSecondary">@color/hd_on_surface_60</item>
+        <item name="selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="android:selectableItemBackground">@drawable/bg_no_press</item>
+        <item name="colorControlHighlight">@android:color/transparent</item>
+    </style>
 </resources>

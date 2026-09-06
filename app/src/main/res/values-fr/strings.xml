@@ -37,6 +37,10 @@
 <string name="toast_autorecon">Reconnexion automatique dans %s secondes</string>
 <string name="toast_can_diag_unsupported">Diagnostics actifs indisponibles en CAN pour l\'instant — utilisez le tableau de bord pour les données live</string>
 <string name="toast_hdi_can_forced_elm">HarleyDroidInterface est réservé au J1850 ; ELM327 utilisé pour le CAN</string>
+<string name="toast_hdi_wifi_forced_elm">HarleyDroidInterface est réservé au Bluetooth ; ELM327 utilisé en WiFi</string>
+<string name="snack_need_device">Choisissez Bluetooth ou WiFi dans Préférences (ou activez la Simulation), puis retapez ▶</string>
+<string name="snack_open_settings">Préférences</string>
+<string name="snack_tap_play_to_connect">Appuyez sur ▶ dans la barre pour vous connecter</string>
 
 <string name="rpm_label">RPM:</string>
 <string name="speed_imperial_label">Vitesse (mph):</string>
@@ -57,6 +61,20 @@
 <string name="fuelavg_metric_label">Cons. (l/100km):</string>
 <string name="fuelinst_imperial_label">Inst. (MPG):</string>
 <string name="fuelinst_metric_label">Inst. (l/100km):</string>
+<string name="mileage_metric_fmt">Inst %1$s · Moy %2$s l/100km</string>
+<string name="mileage_imperial_fmt">Inst %1$s · Moy %2$s MPG</string>
+<string name="mileage_unavailable">Inst — · Moy —</string>
+<string name="alert_oil_title">PRESSION D\'HUILE</string>
+<string name="alert_oil_body">Pression d\'huile basse — arrêtez-vous dès que possible. Ne continuez pas.</string>
+<string name="alert_engine_title">CHECK ENGINE</string>
+<string name="alert_engine_body">Arrêtez-vous si vous pouvez, ou roulez lentement et prudemment à votre rythme.</string>
+<string name="alert_charge_title">SYSTÈME DE CHARGE</string>
+<string name="alert_charge_body">Défaut alternateur / batterie — réduisez la charge, gagnez un arrêt sûr bientôt.</string>
+<string name="bar_fuel_label">Carb</string>
+<string name="bar_temp_label">Temp</string>
+<string name="bar_temp_unit_c">°</string>
+<string name="bar_temp_unit_f">°</string>
+<string name="bar_fuel_unit"></string>
 <string name="vin_label">VIN:</string>
 <string name="ecmpn_label">ECM P/N:</string>
 <string name="ecmcalid_label">Calib. ECM:</string>
@@ -84,13 +102,15 @@
 <string name="notification_autorecon">Reconnexion automatique dans quelques secondes&#8230;</string>
 
 <string name="check_engine">Erreur moteur</string>
+<string name="oil_pressure">Pression d\'huile</string>
+<string name="battery_charge">Charge / alternateur</string>
 <string name="turn_left">Gauche</string>
 <string name="turn_right">Droite</string>
 <string name="low_fuel">Réservoir vide</string>
 <string name="low_fuel_text">Vide</string>
 
 <string name="pref_emulator">Mode simulation</string>
-<string name="pref_emulator_summary">Données factices J1850 ou CAN — sans moto ni interface Bluetooth</string>
+<string name="pref_emulator_summary">Données factices J1850 ou CAN — sans moto ni adaptateur. Repasse en mode réel au prochain lancement de l\'app</string>
 <string name="pref_busprotocol">Type de bus</string>
 <string name="pref_busprotocol_summary">J1850 (4 pins) ou CAN / HDLAN (6 pins)</string>
 <string-array name="pref_busprotocol_names">
@@ -100,6 +120,16 @@
 <string-array name="pref_busprotocol_values">
 	<item>"j1850"</item>
 	<item>"can"</item>
+</string-array>
+<string name="pref_connectiontransport">Connexion</string>
+<string name="pref_connectiontransport_summary">Bluetooth SPP ou WiFi TCP (ELM327)</string>
+<string-array name="pref_connectiontransport_names">
+	<item>"Bluetooth"</item>
+	<item>"WiFi (TCP)"</item>
+</string-array>
+<string-array name="pref_connectiontransport_values">
+	<item>"bluetooth"</item>
+	<item>"wifi"</item>
 </string-array>
 <string name="pref_interfacetype">Type d\'interface</string>
 <string-array name="pref_interfacetype_names">
@@ -112,6 +142,10 @@
 </string-array>
 <string name="pref_bluetoothdev">Périphérique Bluetooth</string>
 <string name="pref_bluetoothdev_none">(aucun appareil appairé)</string>
+<string name="pref_wifi_host">Hôte WiFi (IP)</string>
+<string name="pref_wifi_host_summary">Adresse du point d\'accès ELM327 (souvent 192.168.0.10)</string>
+<string name="pref_wifi_port">Port WiFi</string>
+<string name="pref_wifi_port_summary">Port TCP (généralement 35000)</string>
 <string name="pref_autoconnect">Connexion automatique au lancement</string>
 <string name="pref_autoreconnect">Reconnexion automatique si déconnexion</string>
 <string name="pref_reconnectdelay">Délai avant reconnexion (secondes)</string>
@@ -122,6 +156,26 @@
 <string name="pref_logunknown">Ajouter les données inconnues du bus à la sauvegarde</string>
 <string name="diag_can_unsupported">Les diagnostics actifs (DTC / VIN) ne sont pas encore disponibles en mode CAN. Utilisez le tableau de bord pour la télémétrie live.</string>
 <string name="pref_screenon">Garder l\'écran activé</string>
+<string name="pref_colortheme">Thème de couleur</string>
+<string name="pref_colortheme_summary">Couleur d\'accent des jauges et de l\'interface</string>
+<string-array name="pref_colortheme_names">
+	<item>"Orange (classique)"</item>
+	<item>"Ambre"</item>
+	<item>"Cramoisi"</item>
+	<item>"Sarcelle"</item>
+	<item>"Bleu"</item>
+	<item>"Vert"</item>
+	<item>"Argent"</item>
+</string-array>
+<string-array name="pref_colortheme_values">
+	<item>"orange"</item>
+	<item>"amber"</item>
+	<item>"crimson"</item>
+	<item>"teal"</item>
+	<item>"blue"</item>
+	<item>"green"</item>
+	<item>"silver"</item>
+</string-array>
 <string name="pref_language">Langue</string>
 <string name="pref_language_summary">Langue d\'affichage de l\'application</string>
 <string-array name="pref_language_names">
@@ -171,27 +225,34 @@
 <string name="about_support">Support:</string>
 <string name="about_weburl">github.com/stelian42/HarleyDroid</string>
 <string name="about_notendorsed">HarleyDroidEVO n\'est pas approuvé ou certifié par Harley-Davidson Motor Company.</string>
-<string name="about_needelm327">Cette application nécessite une interface spécifique connectée au bus de diagnostic de la moto.</string>
+<string name="about_needelm327">Cette application nécessite une interface spécifique connectée au bus de diagnostic de la moto (ELM327 Bluetooth ou WiFi).</string>
 <string name="about_ok">OK</string>
 <string name="about_license">Licence</string>
 
-<string name="status_idle">Inactif</string>
+<string name="status_idle">Non connecté</string>
+<string name="status_setup_needed">À configurer</string>
+<string name="status_setup_needed_desc">Toucher pour choisir Bluetooth ou WiFi, ou activer la Simulation</string>
+<string name="status_idle_desc">Toucher pour de l\'aide à la connexion</string>
 <string name="status_connecting">Connexion…</string>
 <string name="status_connected">Connecté</string>
-<string name="status_polling">Capture</string>
+<string name="status_polling">Liaison…</string>
+<string name="status_engine_off">Moteur éteint</string>
+<string name="status_running">En marche</string>
 <string name="status_diagnostics">Diagnostics</string>
 <string name="status_error">Erreur</string>
 <string name="status_error_at">Erreur config ELM327</string>
 <string name="status_nodata">Pas de données</string>
 <string name="status_too_many_errors">Trop d\'erreurs</string>
 <string name="status_reconnect">Reconnexion…</string>
+<string name="badge_simulation">SIMU</string>
+<string name="badge_simulation_desc">Mode simulation actif — toucher pour ouvrir les réglages</string>
 <string name="export_logs_label">Partager les logs</string>
 <string name="export_logs_none">Aucun fichier de log trouvé</string>
 <string name="export_logs_chooser">Partager un log HarleyDroidEVO</string>
-<string name="privacy_note">HarleyDroidEVO utilise le Bluetooth pour parler à votre interface ELM327, et le GPS uniquement si l\'enregistrement avec GPS est activé.</string>
+<string name="privacy_note">HarleyDroidEVO utilise le Bluetooth ou le WiFi/TCP local pour parler à votre interface ELM327, et le GPS uniquement si l\'enregistrement avec GPS est activé.</string>
 <string name="dtc_current_title">Défauts courants</string>
 <string name="dtc_historic_title">Défauts historiques</string>
-<string name="dtc_empty">Aucun</string>
+<string name="dtc_empty">Aucun code défaut</string>
 <string name="vin_tap_hint">Appuyer sur le VIN pour les détails</string>
 
 </resources>

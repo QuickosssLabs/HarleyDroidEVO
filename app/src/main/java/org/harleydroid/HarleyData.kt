@@ -82,7 +82,7 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	}
 
 	fun addHarleyDataDashboardListener(l: HarleyDataDashboardListener) {
-		mDashboardListeners.add(l)
+		if (!mDashboardListeners.contains(l)) mDashboardListeners.add(l)
 	}
 
 	fun removeHarleyDataDashboardListener(l: HarleyDataDashboardListener) {
@@ -90,7 +90,7 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	}
 
 	fun addHarleyDataDiagnosticsListener(l: HarleyDataDiagnosticsListener) {
-		mDiagnosticsListeners.add(l)
+		if (!mDiagnosticsListeners.contains(l)) mDiagnosticsListeners.add(l)
 	}
 
 	fun removeHarleyDataDiagnosticsListener(l: HarleyDataDiagnosticsListener) {
@@ -98,7 +98,7 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	}
 
 	fun addHarleyDataRawListener(l: HarleyDataRawListener) {
-		mRawListeners.add(l)
+		if (!mRawListeners.contains(l)) mRawListeners.add(l)
 	}
 
 	fun removeHarleyDataRawListener(l: HarleyDataRawListener) {
@@ -263,6 +263,22 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 			mSavedFuel / 20
 		else
 			(mSavedFuel + mFuel - mResetFuel) / 20
+	}
+
+	/** Session fuel in raw bus units (finer than [getFuelMetric]). */
+	fun getFuelRawSession(): Int {
+		return if (mResetFuel < 0)
+			mSavedFuel
+		else
+			mSavedFuel + mFuel - mResetFuel
+	}
+
+	/** Session odometer in raw bus units (finer than [getOdometerMetric]). */
+	fun getOdometerRawSession(): Int {
+		return if (mResetOdometer < 0)
+			mSavedOdometer
+		else
+			mSavedOdometer + mOdometer - mResetOdometer
 	}
 
 	fun setFuel(fuel: Int) {
@@ -462,12 +478,22 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 			tail = 1
 
 			while (!stop) {
-				fuelItems[head] = getFuelMetric()
-				odoItems[head] = getOdometerMetric()
-				if (fuelItems[head] != fuelItems[tail] && odoItems[head] != odoItems[tail])
-					setFuelInstant((1000 * (fuelItems[head] - fuelItems[tail])) / (odoItems[head] - odoItems[tail]))
-				else
+				// Use raw session units — getFuelMetric()/20 stays 0 for long stretches in sim
+				fuelItems[head] = getFuelRawSession()
+				odoItems[head] = getOdometerRawSession()
+				val dFuel = fuelItems[head] - fuelItems[tail]
+				val dOdo = odoItems[head] - odoItems[tail]
+				// Average uses (50 * fuelRaw) / odoMetric where odoMetric = odoRaw/25
+				// → instant = (50 * dFuelRaw) / (dOdoRaw/25) = (1250 * dFuelRaw) / dOdoRaw
+				if (dFuel > 0 && dOdo > 0) {
+					val inst = (1250 * dFuel) / dOdo
+					if (inst in 1..4000)
+						setFuelInstant(inst)
+					else
+						setFuelInstant(-1)
+				} else {
 					setFuelInstant(-1)
+				}
 				head++
 				if (head >= MAX_ITEMS)
 					head = 0

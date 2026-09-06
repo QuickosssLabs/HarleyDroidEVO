@@ -24,4 +24,26 @@ class ConnectionViewModel : ViewModel() {
     fun setState(state: ConnectionUiState) {
         _uiState.value = state
     }
+
+    /**
+     * Refine live status from RPM while capturing.
+     * Below ~400 RPM → engine off / ignition; otherwise running.
+     * Safe from any thread (emulator poll uses a background thread).
+     */
+    fun reportEngineRpm(rpm: Int) {
+        when (_uiState.value) {
+            is ConnectionUiState.Polling,
+            is ConnectionUiState.Connected,
+            is ConnectionUiState.EngineOff,
+            is ConnectionUiState.Running -> {
+                val next = if (rpm < 400)
+                    ConnectionUiState.EngineOff
+                else
+                    ConnectionUiState.Running
+                if (_uiState.value != next)
+                    _uiState.postValue(next)
+            }
+            else -> Unit
+        }
+    }
 }

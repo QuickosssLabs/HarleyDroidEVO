@@ -58,6 +58,26 @@ class J1850ParseTest {
         assertEquals(3, data.getGear())
     }
 
+    @Test
+    fun parsesFuelGauge() {
+        // A8 83 61 12 NN — bars 0–15; bit7 of byte3 = low fuel
+        val payload = byteArrayOf(0xa8.toByte(), 0x83.toByte(), 0x61, 0x12, 0x0c)
+        val need = (J1850.crc(payload).toInt().inv() and 0xff).toByte()
+        val sb = StringBuilder()
+        for (b in payload + need) sb.append(String.format("%02X", b.toInt() and 0xff))
+        assertTrue(J1850.parse(sb.toString().toByteArray(), data))
+        assertEquals(12, data.getFuelGauge())
+        assertEquals(false, data.getFuelLow())
+
+        val lowPayload = byteArrayOf(0xa8.toByte(), 0x83.toByte(), 0x61, 0x92.toByte(), 0x02)
+        val lowNeed = (J1850.crc(lowPayload).toInt().inv() and 0xff).toByte()
+        val lowSb = StringBuilder()
+        for (b in lowPayload + lowNeed) lowSb.append(String.format("%02X", b.toInt() and 0xff))
+        assertTrue(J1850.parse(lowSb.toString().toByteArray(), data))
+        assertEquals(2, data.getFuelGauge())
+        assertEquals(true, data.getFuelLow())
+    }
+
     private class MemPrefs : SharedPreferences {
         private val map = HashMap<String, Any?>()
         override fun getAll(): MutableMap<String, *> = map

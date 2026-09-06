@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- No motion — click / snackbar / sheet animations feel like lag on a live dashboard -->
+    <integer name="hd_motion_none">0</integer>
+</resources>

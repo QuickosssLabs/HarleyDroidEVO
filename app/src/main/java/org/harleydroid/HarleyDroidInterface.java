@@ -139,7 +139,7 @@ public class HarleyDroidInterface implements J1850Interface
 
 			try {
 				mSock = new NonBlockingBluetoothSocket();
-				mSock.connect(mDevice);
+				mSock.connect(mHarleyDroidService, mDevice);
 			} catch (IOException e1) {
 				Log.e(TAG, "connect() socket failed", e1);
 				mSock.close();

@@ -17,7 +17,6 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.location.LocationProvider
 import android.os.Bundle
 import android.util.Log
 
@@ -27,6 +26,8 @@ class HarleyDroidGPS(context: Context) : LocationListener {
 		private const val D = false
 		private val TAG = HarleyDroidGPS::class.java.simpleName
 		private const val TWO_MINUTES = 1000 * 60 * 2
+		/** Same value as deprecated LocationProvider.OUT_OF_SERVICE. */
+		private const val STATUS_OUT_OF_SERVICE = 0
 	}
 
 	private val mLocationManager =
@@ -112,7 +113,7 @@ class HarleyDroidGPS(context: Context) : LocationListener {
 	override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
 		if (D) Log.d(TAG, "onStatusChanged($status)")
 
-		if (status == LocationProvider.OUT_OF_SERVICE)
+		if (status == STATUS_OUT_OF_SERVICE)
 			mCurrentBestLocation = null
 	}
 

@@ -44,7 +44,10 @@ public class ELM327Interface implements J1850Interface
 	private PollThread mPollThread;
 	private SendThread mSendThread;
 	private BluetoothDevice mDevice;
-	private NonBlockingBluetoothSocket mSock = null;
+	private String mWifiHost;
+	private int mWifiPort;
+	private final boolean mUseWifi;
+	private ElmTransport mSock = null;
 	private final String mBusProtocol;
 	private final boolean mCanBus;
 
@@ -55,6 +58,20 @@ public class ELM327Interface implements J1850Interface
 	public ELM327Interface(HarleyDroidService harleyDroidService, BluetoothDevice device, String busProtocol) {
 		mHarleyDroidService = harleyDroidService;
 		mDevice = device;
+		mWifiHost = null;
+		mWifiPort = 0;
+		mUseWifi = false;
+		mBusProtocol = busProtocol != null ? busProtocol : BusProtocol.J1850;
+		mCanBus = BusProtocol.isCan(mBusProtocol);
+	}
+
+	/** WiFi / TCP ELM327 (typical port 35000). */
+	public ELM327Interface(HarleyDroidService harleyDroidService, String host, int port, String busProtocol) {
+		mHarleyDroidService = harleyDroidService;
+		mDevice = null;
+		mWifiHost = host;
+		mWifiPort = port;
+		mUseWifi = true;
 		mBusProtocol = busProtocol != null ? busProtocol : BusProtocol.J1850;
 		mCanBus = BusProtocol.isCan(mBusProtocol);
 	}
@@ -173,12 +190,21 @@ public class ELM327Interface implements J1850Interface
 			setName("ELM327Interface: ConnectThread");
 
 			try {
-				mSock = new NonBlockingBluetoothSocket();
-				mSock.connect(mDevice);
+				if (mUseWifi) {
+					NonBlockingTcpSocket tcp = new NonBlockingTcpSocket();
+					tcp.connect(mWifiHost, mWifiPort);
+					mSock = tcp;
+				} else {
+					NonBlockingBluetoothSocket bt = new NonBlockingBluetoothSocket();
+					bt.connect(mHarleyDroidService, mDevice);
+					mSock = bt;
+				}
 			} catch (IOException e1) {
 				Log.e(TAG, "connect() socket failed", e1);
-				mSock.close();
-				mSock = null;
+				if (mSock != null) {
+					mSock.close();
+					mSock = null;
+				}
 				mHarleyDroidService.disconnected(HarleyDroid.STATUS_ERROR);
 				return;
 			}

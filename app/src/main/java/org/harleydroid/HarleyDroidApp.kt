@@ -19,6 +19,11 @@ import androidx.preference.PreferenceManager
 class HarleyDroidApp : Application() {
 	override fun onCreate() {
 		super.onCreate()
-		AppLocale.applyFromPrefs(PreferenceManager.getDefaultSharedPreferences(this))
+		val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+		// Simulation is a session tool — always start in real (Bluetooth) mode
+		if (prefs.getBoolean("emulator", false)) {
+			prefs.edit().putBoolean("emulator", false).apply()
+		}
+		AppLocale.applyFromPrefs(prefs)
 	}
 }

@@ -132,7 +132,7 @@ class HarleyDroidLogger(
     override fun onVINChanged(vin: String) = write("VIN,$vin")
     override fun onECMPNChanged(ecmPN: String) = write("EPN,$ecmPN")
     override fun onECMCalIDChanged(ecmCalID: String) = write("ECI,$ecmCalID")
-    override fun onECMSWLevelChanged(ecmSWLevel: Int) = write("ESL,$ecmSWLevel")
+    override fun onECMSWLevelChanged(swLevel: Int) = write("ESL,$swLevel")
     override fun onHistoricDTCChanged(dtc: Array<String>) = write("DTH,", dtc.joinToString(","))
     override fun onCurrentDTCChanged(dtc: Array<String>) = write("DTC,", dtc.joinToString(","))
     override fun onBadCRCChanged(buffer: ByteArray) = write("CRC,", buffer)

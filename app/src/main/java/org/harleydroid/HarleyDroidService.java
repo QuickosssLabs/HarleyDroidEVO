@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import androidx.preference.PreferenceManager;
@@ -75,6 +76,9 @@ public class HarleyDroidService extends Service
 	private String mInterfaceType = null;
 	private String mBusProtocol = BusProtocol.J1850;
 	private BluetoothDevice mDevice = null;
+	private boolean mUseWifi = false;
+	private String mWifiHost = null;
+	private int mWifiPort = ConnectionTransport.DEFAULT_WIFI_PORT;
 	private J1850Interface mInterface = null;
 	private boolean mLogging = false;
 	private boolean mMetric = true;
@@ -126,8 +130,10 @@ public class HarleyDroidService extends Service
 		        .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, HarleyDroidDashboard.class), piFlags));
 		notify(R.string.notification_connecting);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			// connectedDevice requires a granted BT permission; simulation has none.
-			int fgsType = HarleyDroid.isEmulatorMode(mPrefs)
+			// connectedDevice needs BT permission; simulation / WiFi use dataSync.
+			boolean dataSync = HarleyDroid.isEmulatorMode(mPrefs)
+					|| ConnectionTransport.isWifi(mPrefs);
+			int fgsType = dataSync
 					? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 					: ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE;
 			ServiceCompat.startForeground(this, mNotifyId, mNotifyBuilder.build(), fgsType);
@@ -204,42 +210,64 @@ public class HarleyDroidService extends Service
 	}
 
 	public void setInterfaceType(String interfaceType, BluetoothDevice dev) {
-		setInterfaceType(interfaceType, BusProtocol.fromPrefs(mPrefs), dev);
+		setInterfaceType(interfaceType, BusProtocol.fromPrefs(mPrefs), dev, false, null, 0);
 	}
 
 	public void setInterfaceType(String interfaceType, String busProtocol, BluetoothDevice dev) {
+		setInterfaceType(interfaceType, busProtocol, dev, false, null, 0);
+	}
+
+	public void setInterfaceType(String interfaceType, String busProtocol, BluetoothDevice dev,
+			boolean useWifi, String wifiHost, int wifiPort) {
 		boolean reconnect = (mInterface != null);
 		boolean wantEmulator = HarleyDroid.isEmulatorMode(mPrefs);
 		boolean haveEmulator = mInterface instanceof EmulatorInterface;
 		String effectiveType = interfaceType != null ? interfaceType : "elm327";
 		String effectiveBus = busProtocol != null ? busProtocol : BusProtocol.J1850;
+		boolean effectiveWifi = useWifi && !wantEmulator;
 
-		// HDI is J1850-only — force ELM327 for CAN
+		// HDI is Bluetooth + J1850 only — force ELM327 for CAN or WiFi
 		if (BusProtocol.isCan(effectiveBus) && "hdi".equals(effectiveType))
+			effectiveType = "elm327";
+		if (effectiveWifi)
 			effectiveType = "elm327";
 
 		boolean busChanged = mBusProtocol == null || !mBusProtocol.equals(effectiveBus);
 		boolean typeChanged = mInterfaceType == null || !mInterfaceType.equals(effectiveType);
-		boolean deviceChanged = !wantEmulator && (mDevice == null ||
-				dev == null || !mDevice.getAddress().equals(dev.getAddress()));
+		boolean transportChanged = mUseWifi != effectiveWifi;
+		boolean deviceChanged;
+		if (wantEmulator) {
+			deviceChanged = false;
+		} else if (effectiveWifi) {
+			String host = wifiHost != null ? wifiHost : ConnectionTransport.DEFAULT_WIFI_HOST;
+			int port = wifiPort > 0 ? wifiPort : ConnectionTransport.DEFAULT_WIFI_PORT;
+			deviceChanged = mWifiHost == null || !mWifiHost.equals(host) || mWifiPort != port;
+		} else {
+			deviceChanged = mDevice == null ||
+					dev == null || !mDevice.getAddress().equals(dev.getAddress());
+		}
 
-		if (typeChanged || busChanged || wantEmulator != haveEmulator || deviceChanged) {
+		if (typeChanged || busChanged || wantEmulator != haveEmulator || deviceChanged || transportChanged) {
 
-			if (D) Log.d(TAG, "setInterfaceType(" + effectiveType + ", bus=" + effectiveBus + ")");
+			if (D) Log.d(TAG, "setInterfaceType(" + effectiveType + ", bus=" + effectiveBus +
+					", wifi=" + effectiveWifi + ")");
 
 			mInterfaceType = effectiveType;
 			mBusProtocol = effectiveBus;
-			mDevice = dev;
+			mDevice = effectiveWifi ? null : dev;
+			mUseWifi = effectiveWifi;
+			mWifiHost = effectiveWifi ? wifiHost : null;
+			mWifiPort = effectiveWifi ? wifiPort : ConnectionTransport.DEFAULT_WIFI_PORT;
 			if (reconnect)
 				doDisconnect();
 			if (wantEmulator)
 				mInterface = new EmulatorInterface(this, effectiveBus);
-			else {
-				if ("elm327".equals(effectiveType))
-					mInterface = new ELM327Interface(this, dev, effectiveBus);
-				else if ("hdi".equals(effectiveType))
-					mInterface = new HarleyDroidInterface(this, dev);
-			}
+			else if (effectiveWifi)
+				mInterface = new ELM327Interface(this, mWifiHost, mWifiPort, effectiveBus);
+			else if ("elm327".equals(effectiveType))
+				mInterface = new ELM327Interface(this, dev, effectiveBus);
+			else if ("hdi".equals(effectiveType))
+				mInterface = new HarleyDroidInterface(this, dev);
 			mCurrentState = STATE_DISCONNECT;
 			if (reconnect)
 				stateMachine();
@@ -574,6 +602,7 @@ public class HarleyDroidService extends Service
 		private final WeakReference<HarleyDroidService> mHarleyDroidService;
 
 	    HarleyDroidServiceHandler(HarleyDroidService harleyDroidService) {
+	        super(Looper.getMainLooper());
 	        mHarleyDroidService = new WeakReference<HarleyDroidService>(harleyDroidService);
 	    }
 

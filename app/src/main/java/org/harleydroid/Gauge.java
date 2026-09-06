@@ -27,25 +27,22 @@
 
 package org.harleydroid;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.harleydroid.R;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -64,7 +61,6 @@ public final class Gauge extends View {
 	private Paint rimCirclePaint;
 
 	private RectF faceRect;
-	private Bitmap faceTexture;
 	private Paint facePaint;
 	private Paint rimShadowPaint;
 
@@ -101,6 +97,14 @@ public final class Gauge extends View {
 
 	private Paint odoPaint;
 	private Paint odoBackgroundPaint;
+	private Paint odoFramePaint;
+	private Paint accentRingPaint;
+	private Paint faceHighlightPaint;
+	private Paint unitSuffixPaint;
+	private Paint logoPaint;
+	/** Shared across Gauge instances — decoded once per process. */
+	private static Bitmap sSharedLogo;
+	private Bitmap logoBitmap;
 
 	// end drawing tools
 
@@ -117,43 +121,45 @@ public final class Gauge extends View {
 	private int incrementPerLargeNotch       = 10;
 	private int incrementPerSmallNotch       = 2;
 
-	private int scaleColor                   = 0xff0a5c18;
+	private int scaleColor                   = 0xffF5F0EA;
 	private int scaleCenterValue             = 0; // the one in the top center (12 o'clock), this corresponds with -90 degrees
 	private int scaleMinValue                = -90;
 	private int scaleMaxValue                = 120;
 	private float degreeMinValue             = 0;
 	private float degreeMaxValue             = 0;
 
-	private int rangeOkColor                 = 0x9f00ff00;
+	private int rangeOkColor                 = 0x9f2ECC71;
 	private int rangeOkMinValue              = scaleMinValue;
 	private int rangeOkMaxValue              = 45;
 	private float degreeOkMinValue           = 0;
 	private float degreeOkMaxValue           = 0;
 
-	private int rangeWarningColor            = 0x9fff8800;
+	private int rangeWarningColor            = 0x9fF5A623;
 	private int rangeWarningMinValue         = rangeOkMaxValue;
 	private int rangeWarningMaxValue         = 80;
 	private float degreeWarningMinValue      = 0;
 	private float degreeWarningMaxValue      = 0;
 
-	private int rangeErrorColor              = 0x9fff0000;
+	private int rangeErrorColor              = 0x9fE74C3C;
 	private int rangeErrorMinValue           = rangeWarningMaxValue;
 	private int rangeErrorMaxValue           = 120;
 	private float degreeErrorMinValue        = 0;
 	private float degreeErrorMaxValue        = 0;
 
-	private int odoColor                     = 0xff00ff00;
-	private int odoBackgroundColor           = 0xff000000;
+	private int odoColor                     = 0xffFF6B1E;
+	private int odoBackgroundColor           = 0xff0A0A0A;
 
-	private String lowerTitle                = "www.ats-global.com";
-	private String upperTitle                = "Visit http://atstechlab.wordpress.com";
+	private String lowerTitle                = "HarleyDroidEVO";
+	private String upperTitle                = "";
 	private String unitTitle                 = "\u2103";
+	private String unitMain                  = "";
+	private String unitSuffix                = "";
 
 	// Fixed values.
 	private static final float scalePosition = 0.10f;  // The distance from the rim to the scale
 	private static final float valuePosition = 0.285f; // The distance from the rim to the ranges
 	private static final float rangePosition = 0.122f; // The distance from the rim to the ranges
-	private static final float rimSize       = 0.02f;
+	private static final float rimSize       = 0.028f;
 
 	private float degreesPerNotch            = 360.0f/totalNotches;
 	private static final int centerDegrees   =  -90; // the one in the top center (12 o'clock), this corresponds with -90 degrees
@@ -166,6 +172,20 @@ public final class Gauge extends View {
 	private float dialVelocity              = 0.0f;
 	private float dialAcceleration          = 0.0f;
 	private long lastDialMoveTime           = -1L;
+	private boolean dialAnimating           = false;
+	private String cachedOdoText            = "0";
+	private final Rect odoTextBounds        = new Rect();
+	private final Runnable dialAnimator     = new Runnable() {
+		@Override
+		public void run() {
+			if (!advanceDial()) {
+				dialAnimating = false;
+				return;
+			}
+			invalidateIfVisible();
+			postOnAnimation(this);
+		}
+	};
 
 
 	public Gauge(Context context) {
@@ -190,13 +210,21 @@ public final class Gauge extends View {
 
 	@Override
 	protected void onDetachedFromWindow() {
+		removeCallbacks(dialAnimator);
+		dialAnimating = false;
 		super.onDetachedFromWindow();
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onRestoreInstanceState(Parcelable state) {
 		Bundle bundle = (Bundle) state;
-		Parcelable superState = bundle.getParcelable("superState");
+		Parcelable superState;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			superState = bundle.getParcelable("superState", Parcelable.class);
+		} else {
+			superState = bundle.getParcelable("superState");
+		}
 		super.onRestoreInstanceState(superState);
 
 		dialInitialized  = bundle.getBoolean("dialInitialized");
@@ -223,19 +251,9 @@ public final class Gauge extends View {
 	}
 
 	private void init(Context context, AttributeSet attrs) {
-
-		try {
-		    Method setLayerTypeMethod = getClass().getMethod("setLayerType", new Class[] {int.class, Paint.class});
-		    setLayerTypeMethod.invoke(this, new Object[] {LAYER_TYPE_SOFTWARE, null});
-		} catch (NoSuchMethodException e) {
-		    // Older OS, no HW acceleration anyway
-		} catch (IllegalArgumentException e) {
-		    e.printStackTrace();
-		} catch (IllegalAccessException e) {
-		    e.printStackTrace();
-		} catch (InvocationTargetException e) {
-		    e.printStackTrace();
-		}
+		// Hardware layer: SOFTWARE + continuous invalidate was saturating the UI thread
+		// and making taps feel laggy after the gauge redesign.
+		setLayerType(LAYER_TYPE_HARDWARE, null);
 
 		// Get the properties from the resource file.
 		if (context != null && attrs != null){
@@ -269,7 +287,10 @@ public final class Gauge extends View {
 			if (unitTitle != null) this.unitTitle = unitTitle;
 			if (lowerTitle != null) this.lowerTitle = lowerTitle;
 			if (upperTitle != null) this.upperTitle = upperTitle;
+			parseUnitTitle();
 			a.recycle();
+		} else {
+			parseUnitTitle();
 		}
 		degreesPerNotch       = 360.0f/totalNotches;
 		degreeMinValue        = valueToAngle(scaleMinValue)        + centerDegrees;
@@ -284,7 +305,23 @@ public final class Gauge extends View {
 		initDrawingTools(context);
 	}
 
+	private void parseUnitTitle() {
+		unitMain = unitTitle != null ? unitTitle : "";
+		unitSuffix = "";
+		if (unitTitle == null) {
+			return;
+		}
+		int idx = unitTitle.lastIndexOf(" x");
+		if (idx > 0) {
+			unitMain = unitTitle.substring(0, idx).trim();
+			unitSuffix = unitTitle.substring(idx + 1).trim();
+		}
+	}
+
 	private void initDrawingTools(Context context) {
+		int accent = AppTheme.primary(context);
+		odoColor = accent;
+
 		rimRect = new RectF(0.0f, 0.0f, 1.0f, 1.0f);
 
 		faceRect = new RectF();
@@ -303,84 +340,96 @@ public final class Gauge extends View {
 		valueRect.set(faceRect.left  + valuePosition, faceRect.top    + valuePosition,
 				faceRect.right - valuePosition, faceRect.bottom - valuePosition);
 
-		// top < bottom (RectF); previous values were inverted and broke the LCD background
-		odoRect = new RectF(0.32f, 0.62f, 0.68f, 0.74f);
+		// Digital readout lower in the dial (above brand)
+		odoRect = new RectF(0.28f, 0.62f, 0.72f, 0.755f);
 
-		faceTexture = BitmapFactory.decodeResource(getContext().getResources(), R.drawable.plastic);
-		BitmapShader paperShader = new BitmapShader(faceTexture,
-				Shader.TileMode.MIRROR,
-				Shader.TileMode.MIRROR);
-		Matrix paperMatrix = new Matrix();
-		paperMatrix.setScale(1.0f / faceTexture.getWidth(),
-				1.0f / faceTexture.getHeight());
+		if (sSharedLogo == null || sSharedLogo.isRecycled()) {
+			sSharedLogo = BitmapFactory.decodeResource(
+					getContext().getResources(), R.drawable.ic_logo_mark);
+		}
+		logoBitmap = sSharedLogo;
 
-		paperShader.setLocalMatrix(paperMatrix);
+		// Dark brushed-metal face: deep charcoal with cool specular highlight
+		facePaint = new Paint();
+		facePaint.setAntiAlias(true);
+		facePaint.setStyle(Paint.Style.FILL);
+		facePaint.setShader(new RadialGradient(
+				0.42f, 0.38f, 0.72f,
+				new int[] { 0xff3A3A3C, 0xff1C1C1E, 0xff0B0B0C, 0xff050505 },
+				new float[] { 0f, 0.35f, 0.75f, 1f },
+				Shader.TileMode.CLAMP));
+
+		faceHighlightPaint = new Paint();
+		faceHighlightPaint.setAntiAlias(true);
+		faceHighlightPaint.setStyle(Paint.Style.STROKE);
+		faceHighlightPaint.setStrokeWidth(0.012f);
+		faceHighlightPaint.setColor(0x14FFFFFF);
 
 		rimShadowPaint = new Paint();
 		rimShadowPaint.setShader(new RadialGradient(0.5f, 0.5f, faceRect.width() / 2.0f,
-				new int[] { 0x00000000, 0x00000500, 0x50000500 },
-				new float[] { 0.96f, 0.96f, 0.99f },
-				Shader.TileMode.MIRROR));
+				new int[] { 0x00000000, 0x00000000, 0x44000000 },
+				new float[] { 0.88f, 0.96f, 1f },
+				Shader.TileMode.CLAMP));
 		rimShadowPaint.setStyle(Paint.Style.FILL);
 
-		// the linear gradient is a bit skewed for realism
 		rimPaint = new Paint();
 		rimPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-		rimPaint.setShader(new LinearGradient(0.40f, 0.0f, 0.60f, 1.0f,
-				Color.rgb(0xf0, 0xf5, 0xf0),
-				Color.rgb(0x30, 0x31, 0x30),
+		rimPaint.setShader(new LinearGradient(0.20f, 0.0f, 0.80f, 1.0f,
+				Color.rgb(0x2A, 0x2A, 0x2C),
+				Color.rgb(0x12, 0x12, 0x14),
 				Shader.TileMode.CLAMP));
 
 		rimCirclePaint = new Paint();
 		rimCirclePaint.setAntiAlias(true);
 		rimCirclePaint.setStyle(Paint.Style.STROKE);
-		rimCirclePaint.setColor(Color.argb(0x4f, 0x33, 0x36, 0x33));
-		rimCirclePaint.setStrokeWidth(0.005f);
+		rimCirclePaint.setColor(Color.argb(0x33, 0x20, 0x20, 0x22));
+		rimCirclePaint.setStrokeWidth(0.004f);
 
-		facePaint = new Paint();
-		facePaint.setFilterBitmap(true);
-		facePaint.setStyle(Paint.Style.FILL);
-		facePaint.setShader(paperShader);
+		accentRingPaint = new Paint();
+		accentRingPaint.setAntiAlias(true);
+		accentRingPaint.setStyle(Paint.Style.STROKE);
+		accentRingPaint.setColor(accent);
+		accentRingPaint.setStrokeWidth(0.022f);
 
 		scalePaint = new Paint();
 		scalePaint.setStyle(Paint.Style.STROKE);
 		scalePaint.setColor(scaleColor);
-		scalePaint.setStrokeWidth(0.005f);
+		scalePaint.setStrokeWidth(0.010f);
 		scalePaint.setAntiAlias(true);
 
-		// Separate FILL paint for digits — STROKE on text caused ghosted/hollow numbers
 		scaleTextPaint = new Paint();
 		scaleTextPaint.setStyle(Paint.Style.FILL);
 		scaleTextPaint.setColor(scaleColor);
 		scaleTextPaint.setAntiAlias(true);
-		scaleTextPaint.setTextSize(0.055f);
-		scaleTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+		scaleTextPaint.setTextSize(0.052f);
+		scaleTextPaint.setStrokeWidth(0f);
+		scaleTextPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
 		scaleTextPaint.setTextAlign(Paint.Align.CENTER);
+		scaleTextPaint.setFakeBoldText(false);
 
 		rangeOkPaint = new Paint();
 		rangeOkPaint.setStyle(Paint.Style.STROKE);
 		rangeOkPaint.setColor(rangeOkColor);
-		rangeOkPaint.setStrokeWidth(0.012f);
+		rangeOkPaint.setStrokeWidth(0.014f);
 		rangeOkPaint.setAntiAlias(true);
 
 		rangeWarningPaint = new Paint();
 		rangeWarningPaint.setStyle(Paint.Style.STROKE);
 		rangeWarningPaint.setColor(rangeWarningColor);
-		rangeWarningPaint.setStrokeWidth(0.012f);
+		rangeWarningPaint.setStrokeWidth(0.014f);
 		rangeWarningPaint.setAntiAlias(true);
 
 		rangeErrorPaint = new Paint();
 		rangeErrorPaint.setStyle(Paint.Style.STROKE);
 		rangeErrorPaint.setColor(rangeErrorColor);
-		rangeErrorPaint.setStrokeWidth(0.012f);
+		rangeErrorPaint.setStrokeWidth(0.014f);
 		rangeErrorPaint.setAntiAlias(true);
 
 		rangeAllPaint = new Paint();
 		rangeAllPaint.setStyle(Paint.Style.STROKE);
-		rangeAllPaint.setColor(0xcff8f8f8);
-		rangeAllPaint.setStrokeWidth(0.012f);
+		rangeAllPaint.setColor(0x55FFFFFF);
+		rangeAllPaint.setStrokeWidth(0.014f);
 		rangeAllPaint.setAntiAlias(true);
-		rangeAllPaint.setShadowLayer(0.005f, -0.002f, -0.002f, 0x7f000000);
 
 		valueOkPaint = new Paint();
 		valueOkPaint.setStyle(Paint.Style.STROKE);
@@ -402,60 +451,71 @@ public final class Gauge extends View {
 
 		valueAllPaint = new Paint();
 		valueAllPaint.setStyle(Paint.Style.STROKE);
-		valueAllPaint.setColor(0xcff8f8f8);
+		valueAllPaint.setColor(0x55FFFFFF);
 		valueAllPaint.setStrokeWidth(0.20f);
 		valueAllPaint.setAntiAlias(true);
-		valueAllPaint.setShadowLayer(0.005f, -0.002f, -0.002f, 0x7f000000);
 
 		unitPaint = new Paint();
 		unitPaint.setStyle(Paint.Style.FILL);
-		unitPaint.setColor(0xff1a1a1a);
+		unitPaint.setColor(0xffF5F0EA);
 		unitPaint.setAntiAlias(true);
 		unitPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
 		unitPaint.setTextAlign(Paint.Align.CENTER);
-		unitPaint.setTextSize(0.07f);
+		unitPaint.setTextSize(0.048f);
+		unitPaint.setLetterSpacing(0.06f);
+
+		unitSuffixPaint = new Paint();
+		unitSuffixPaint.setStyle(Paint.Style.FILL);
+		unitSuffixPaint.setColor(accent);
+		unitSuffixPaint.setAntiAlias(true);
+		unitSuffixPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
+		unitSuffixPaint.setTextAlign(Paint.Align.CENTER);
+		unitSuffixPaint.setTextSize(0.028f);
+		unitSuffixPaint.setLetterSpacing(0.04f);
 
 		upperTitlePaint = new Paint();
 		upperTitlePaint.setStyle(Paint.Style.FILL);
-		upperTitlePaint.setColor(0xff333333);
+		upperTitlePaint.setColor(0xffCCCCCC);
 		upperTitlePaint.setAntiAlias(true);
 		upperTitlePaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
 		upperTitlePaint.setTextAlign(Paint.Align.CENTER);
-		upperTitlePaint.setTextSize(0.045f);
+		upperTitlePaint.setTextSize(0.040f);
 
 		lowerTitlePaint = new Paint();
 		lowerTitlePaint.setStyle(Paint.Style.FILL);
-		lowerTitlePaint.setColor(0xff333333);
+		lowerTitlePaint.setColor(accent);
 		lowerTitlePaint.setAntiAlias(true);
 		lowerTitlePaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
 		lowerTitlePaint.setTextAlign(Paint.Align.CENTER);
-		lowerTitlePaint.setTextSize(0.04f);
+		lowerTitlePaint.setTextSize(0.032f);
+		lowerTitlePaint.setLetterSpacing(0.08f);
 
+		logoPaint = new Paint();
+		logoPaint.setAntiAlias(true);
+		logoPaint.setFilterBitmap(true);
+		logoPaint.setAlpha(210);
 
 		handPaint = new Paint();
 		handPaint.setAntiAlias(true);
-		handPaint.setColor(0xff392f2c);
-		handPaint.setShadowLayer(0.01f, -0.005f, -0.005f, 0x7f000000);
+		handPaint.setColor(0xffE8E0D8);
+		// No setShadowLayer — requires SOFTWARE layers and tanks frame time.
 		handPaint.setStyle(Paint.Style.FILL);
 
 		handScrewPaint = new Paint();
 		handScrewPaint.setAntiAlias(true);
-		//handScrewPaint.setColor(0xff493f3c);
-		handScrewPaint.setColor(0xffff3f3c);
+		handScrewPaint.setColor(accent);
 		handScrewPaint.setStyle(Paint.Style.FILL);
 
 		backgroundPaint = new Paint();
 		backgroundPaint.setFilterBitmap(true);
 
-		// The hand is drawn with the tip facing up. That means when the image is not rotated, the tip
-		// faces north. When the the image is rotated -90 degrees, the tip is facing west and so on.
-		handPath = new Path();                                              //   X      Y
-		handPath.moveTo(0.5f, 0.5f + 0.2f);                                 // 0.500, 0.700
-		handPath.lineTo(0.5f - 0.010f, 0.5f + 0.2f - 0.007f);               // 0.490, 0.630
-		handPath.lineTo(0.5f - 0.002f, 0.5f - 0.40f);                       // 0.498, 0.100
-		handPath.lineTo(0.5f + 0.002f, 0.5f - 0.40f);                       // 0.502, 0.100
-		handPath.lineTo(0.5f + 0.010f, 0.5f + 0.2f - 0.007f);               // 0.510, 0.630
-		handPath.lineTo(0.5f, 0.5f + 0.2f);                                 // 0.500, 0.700
+		handPath = new Path();
+		handPath.moveTo(0.5f, 0.5f + 0.2f);
+		handPath.lineTo(0.5f - 0.010f, 0.5f + 0.2f - 0.007f);
+		handPath.lineTo(0.5f - 0.002f, 0.5f - 0.40f);
+		handPath.lineTo(0.5f + 0.002f, 0.5f - 0.40f);
+		handPath.lineTo(0.5f + 0.010f, 0.5f + 0.2f - 0.007f);
+		handPath.lineTo(0.5f, 0.5f + 0.2f);
 		handPath.addCircle(0.5f, 0.5f, 0.025f, Path.Direction.CW);
 
 		odoPaint = new Paint();
@@ -468,13 +528,20 @@ public final class Gauge extends View {
 		odoPaint.setStyle(Paint.Style.FILL);
 		odoPaint.setColor(odoColor);
 		odoPaint.setAntiAlias(true);
-		odoPaint.setTextSize(0.085f);
+		odoPaint.setTextSize(0.090f);
 		odoPaint.setTypeface(lcd);
 		odoPaint.setTextAlign(Paint.Align.CENTER);
 
 		odoBackgroundPaint = new Paint();
 		odoBackgroundPaint.setStyle(Paint.Style.FILL);
 		odoBackgroundPaint.setColor(odoBackgroundColor);
+		odoBackgroundPaint.setAntiAlias(true);
+
+		odoFramePaint = new Paint();
+		odoFramePaint.setStyle(Paint.Style.STROKE);
+		odoFramePaint.setColor(accent);
+		odoFramePaint.setStrokeWidth(0.010f);
+		odoFramePaint.setAntiAlias(true);
 	}
 
 	@Override
@@ -513,18 +580,28 @@ public final class Gauge extends View {
 	}
 
 	private void drawRim(Canvas canvas) {
-		// first, draw the metallic body
 		canvas.drawOval(rimRect, rimPaint);
-		// now the outer rim circle
-		canvas.drawOval(rimRect, rimCirclePaint);
+		// Clean orange accent ring only — no pale halo
+		RectF accent = new RectF(
+				rimRect.left + 0.012f, rimRect.top + 0.012f,
+				rimRect.right - 0.012f, rimRect.bottom - 0.012f);
+		canvas.drawOval(accent, accentRingPaint);
 	}
 
 	private void drawFace(Canvas canvas) {
 		canvas.drawOval(faceRect, facePaint);
-		// draw the inner rim circle
-		canvas.drawOval(faceRect, rimCirclePaint);
-		// draw the rim shadow inside the face
+		// Soft inner shadow only (no whitish rim that covers scale digits)
 		canvas.drawOval(faceRect, rimShadowPaint);
+	}
+
+	private void drawCenterLogo(Canvas canvas) {
+		if (logoBitmap == null) {
+			return;
+		}
+		float size = 0.14f;
+		RectF dst = new RectF(0.5f - size / 2f, 0.5f - size / 2f,
+				0.5f + size / 2f, 0.5f + size / 2f);
+		canvas.drawBitmap(logoBitmap, null, dst, logoPaint);
 	}
 
 
@@ -550,7 +627,11 @@ public final class Gauge extends View {
 
 			if (i % (incrementPerLargeNotch / incrementPerSmallNotch) == 0) {
 				if (value >= scaleMinValue && value <= scaleMaxValue) {
-					canvas.drawLine(0.5f, y1, 0.5f, y3, scalePaint);
+					// Thicker major ticks for readability
+					float saved = scalePaint.getStrokeWidth();
+					scalePaint.setStrokeWidth(0.014f);
+					canvas.drawLine(0.5f, y1, 0.5f, y3 - 0.008f, scalePaint);
+					scalePaint.setStrokeWidth(saved);
 				}
 			} else if (value >= scaleMinValue && value <= scaleMaxValue) {
 				canvas.drawLine(0.5f, y1, 0.5f, y2, scalePaint);
@@ -571,17 +652,19 @@ public final class Gauge extends View {
 	}
 
 	/**
-	 * All gauge text must be drawn in pixel coordinates. Under canvas.scale(width,width)
-	 * both drawText and drawTextOnPath collapse glyph advances to ~0 on modern Android
-	 * (characters stack into one blob).
+	 * Scale numerals in pixel space, kept upright and optically centered on each major tick.
 	 */
 	private void drawScaleLabelsPx(Canvas canvas, float s) {
 		float savedSize = scaleTextPaint.getTextSize();
 		scaleTextPaint.setTextSize(savedSize * s);
 
-		float cx = s * 0.5f;
-		float cy = s * 0.5f;
-		float labelY = (scaleRect.top - 0.043f) * s;
+		Paint.FontMetrics fm = scaleTextPaint.getFontMetrics();
+		float textMid = (fm.ascent + fm.descent) / 2f;
+		// Slightly outside the major tick tips so digits clear the white notches
+		float rNorm = 0.5f - (scaleRect.top - 0.070f);
+		float cx = 0.5f * s;
+		float cy = 0.5f * s;
+		float r = rNorm * s;
 
 		for (int i = 0; i < totalNotches; ++i) {
 			int value = notchToValue(i);
@@ -591,24 +674,28 @@ public final class Gauge extends View {
 			if (value < scaleMinValue || value > scaleMaxValue) {
 				continue;
 			}
-			canvas.save();
-			canvas.rotate(i * degreesPerNotch, cx, cy);
-			canvas.drawText(Integer.toString(value), cx, labelY, scaleTextPaint);
-			canvas.restore();
+			// Notch 0 = 12 o'clock; canvas rotation is clockwise
+			double rad = Math.toRadians(-90.0 + i * degreesPerNotch);
+			float x = cx + (float) (r * Math.cos(rad));
+			float y = cy + (float) (r * Math.sin(rad)) - textMid;
+			canvas.drawText(Integer.toString(value), x, y, scaleTextPaint);
 		}
 		scaleTextPaint.setTextSize(savedSize);
 	}
 
 	private void drawTitlesPx(Canvas canvas, float s) {
 		if (upperTitle != null && upperTitle.length() > 0) {
-			drawPxText(canvas, upperTitle, 0.5f, 0.30f, upperTitlePaint, s);
+			drawPxTextCentered(canvas, upperTitle, 0.5f, 0.28f, upperTitlePaint, s);
 		}
-		if (unitTitle != null && unitTitle.length() > 0) {
-			drawPxText(canvas, unitTitle, 0.5f, 0.40f, unitPaint, s);
+		if (unitMain != null && unitMain.length() > 0) {
+			drawPxTextCentered(canvas, unitMain, 0.5f, 0.325f, unitPaint, s);
+		}
+		if (unitSuffix != null && unitSuffix.length() > 0) {
+			drawPxTextCentered(canvas, unitSuffix, 0.5f, 0.358f, unitSuffixPaint, s);
 		}
 		if (lowerTitle != null && lowerTitle.length() > 0) {
-			float y = showOdo ? 0.56f : 0.70f;
-			drawPxText(canvas, lowerTitle, 0.5f, y, lowerTitlePaint, s);
+			float y = showOdo ? 0.825f : 0.72f;
+			drawPxTextCentered(canvas, lowerTitle, 0.5f, y, lowerTitlePaint, s);
 		}
 	}
 
@@ -619,18 +706,46 @@ public final class Gauge extends View {
 		paint.setTextSize(saved);
 	}
 
-	private void drawOdoBackground(Canvas canvas) {
-		canvas.drawRect(odoRect, odoBackgroundPaint);
+	/** Draw text centered on (nx, ny) in normalized dial coordinates. */
+	private void drawPxTextCentered(Canvas canvas, String text, float nx, float ny, Paint paint, float s) {
+		float saved = paint.getTextSize();
+		Paint.Align savedAlign = paint.getTextAlign();
+		paint.setTextSize(saved * s);
+		paint.setTextAlign(Paint.Align.CENTER);
+		Paint.FontMetrics fm = paint.getFontMetrics();
+		float baseline = ny * s - (fm.ascent + fm.descent) / 2f;
+		canvas.drawText(text, nx * s, baseline, paint);
+		paint.setTextSize(saved);
+		paint.setTextAlign(savedAlign);
 	}
 
-	private void drawOdoTextPx(Canvas canvas, float s) {
-		String text = String.format(java.util.Locale.US, "%.0f", targetOdoValue);
+	/** Frame + digits in the same pixel space so they stay aligned. */
+	private void drawOdoPx(Canvas canvas, float s) {
+		// Frame
+		RectF box = new RectF(
+				odoRect.left * s, odoRect.top * s,
+				odoRect.right * s, odoRect.bottom * s);
+		float radius = 0.02f * s;
+		float strokeSaved = odoFramePaint.getStrokeWidth();
+		odoFramePaint.setStrokeWidth(Math.max(2f, strokeSaved * s));
+		canvas.drawRoundRect(box, radius, radius, odoBackgroundPaint);
+		canvas.drawRoundRect(box, radius, radius, odoFramePaint);
+		odoFramePaint.setStrokeWidth(strokeSaved);
+
+		// Digits: center on actual glyph ink (Digital-7 has uneven metrics)
+		String text = cachedOdoText;
 		float saved = odoPaint.getTextSize();
+		Paint.Align savedAlign = odoPaint.getTextAlign();
 		odoPaint.setTextSize(saved * s);
-		Paint.FontMetrics fm = odoPaint.getFontMetrics();
-		float baseline = odoRect.centerY() * s - (fm.ascent + fm.descent) / 2f;
-		canvas.drawText(text, odoRect.centerX() * s, baseline, odoPaint);
+		odoPaint.setTextAlign(Paint.Align.LEFT);
+		odoPaint.getTextBounds(text, 0, text.length(), odoTextBounds);
+		float cx = box.centerX();
+		float cy = box.centerY();
+		float x = cx - odoTextBounds.exactCenterX();
+		float baseline = cy - odoTextBounds.exactCenterY();
+		canvas.drawText(text, x, baseline, odoPaint);
 		odoPaint.setTextSize(saved);
+		odoPaint.setTextAlign(savedAlign);
 	}
 
 	private void drawHand(Canvas canvas) {
@@ -694,25 +809,25 @@ public final class Gauge extends View {
 		drawBackground(canvas);
 
 		float scale = (float) getWidth();
-		canvas.save();
-		canvas.scale(scale, scale);
 		if (showGauge) {
+			canvas.save();
+			canvas.scale(scale, scale);
 			drawGauge(canvas);
+			canvas.restore();
 		}
+
+		// Digital readout under the needle
 		if (showOdo) {
-			drawOdoBackground(canvas);
+			drawOdoPx(canvas, scale);
 		}
+
+		// Needle on top of digital frame
 		if (showHand) {
+			canvas.save();
+			canvas.scale(scale, scale);
 			drawHand(canvas);
+			canvas.restore();
 		}
-		canvas.restore();
-
-		// Odo digits in pixel space (same glyph-advance bug as scale labels)
-		if (showOdo) {
-			drawOdoTextPx(canvas, scale);
-		}
-
-		calculateCurrentValue();
 	}
 
 	@Override
@@ -737,6 +852,7 @@ public final class Gauge extends View {
 		backgroundCanvas.scale(scale, scale);
 		drawRim(backgroundCanvas);
 		drawFace(backgroundCanvas);
+		drawCenterLogo(backgroundCanvas);
 		drawScale(backgroundCanvas);
 		if (showRange) {
 			drawScaleRanges(backgroundCanvas);
@@ -751,47 +867,100 @@ public final class Gauge extends View {
 		drawTitlesPx(backgroundCanvas, scale);
 	}
 
-	// Move the hand slowly to the new position.
-	private void calculateCurrentValue() {
-		if (!(Math.abs(currentValue - targetValue) > 0.01f)) {
-			return;
+	/** @return true if the needle still needs another frame. */
+	private boolean advanceDial() {
+		if (Math.abs(currentValue - targetValue) <= 0.01f) {
+			currentValue = targetValue;
+			dialVelocity = 0.0f;
+			dialAcceleration = 0.0f;
+			lastDialMoveTime = -1L;
+			return false;
 		}
 
-		if (lastDialMoveTime != -1L) {
-			long currentTime = System.currentTimeMillis();
-			float delta = (currentTime - lastDialMoveTime) / 1000.0f;
-
-			float direction = Math.signum(dialVelocity);
-			if (Math.abs(dialVelocity) < 90.0f) {
-				dialAcceleration = 5.0f * (targetValue - currentValue);
-			} else {
-				dialAcceleration = 0.0f;
-			}
-			currentValue += dialVelocity * delta;
-			dialVelocity += dialAcceleration * delta;
-			if ((targetValue - currentValue) * direction < 0.01f * direction) {
-				currentValue = targetValue;
-				dialVelocity = 0.0f;
-				dialAcceleration = 0.0f;
-				lastDialMoveTime = -1L;
-			} else {
-				lastDialMoveTime = System.currentTimeMillis();
-			}
-			invalidate();
-		} else {
+		if (lastDialMoveTime == -1L) {
 			lastDialMoveTime = System.currentTimeMillis();
-			calculateCurrentValue();
+			return true;
+		}
+
+		long currentTime = System.currentTimeMillis();
+		float delta = (currentTime - lastDialMoveTime) / 1000.0f;
+		if (delta <= 0f) {
+			return true;
+		}
+		// Cap dt so a stalled frame does not fling the needle.
+		if (delta > 0.05f) {
+			delta = 0.05f;
+		}
+
+		float direction = Math.signum(targetValue - currentValue);
+		if (Math.abs(dialVelocity) < 90.0f) {
+			dialAcceleration = 5.0f * (targetValue - currentValue);
+		} else {
+			dialAcceleration = 0.0f;
+		}
+		currentValue += dialVelocity * delta;
+		dialVelocity += dialAcceleration * delta;
+		if ((targetValue - currentValue) * direction < 0.01f * direction) {
+			currentValue = targetValue;
+			dialVelocity = 0.0f;
+			dialAcceleration = 0.0f;
+			lastDialMoveTime = -1L;
+			return false;
+		}
+		lastDialMoveTime = currentTime;
+		return true;
+	}
+
+	private void startDialAnimation() {
+		if (dialAnimating || getVisibility() != VISIBLE) {
+			return;
+		}
+		dialAnimating = true;
+		postOnAnimation(dialAnimator);
+	}
+
+	private void stopDialAnimation() {
+		if (dialAnimating) {
+			removeCallbacks(dialAnimator);
+			dialAnimating = false;
+		}
+		lastDialMoveTime = -1L;
+	}
+
+	private void invalidateIfVisible() {
+		if (getVisibility() == VISIBLE) {
+			invalidate();
 		}
 	}
 
+	private void updateCachedOdoText(float value) {
+		cachedOdoText = String.format(java.util.Locale.US, "%.0f", value);
+	}
+
 	public void setValue(float value) {
-		if      (value < scaleMinValue) value = scaleMinValue;
+		if (value < scaleMinValue) value = scaleMinValue;
 		else if (value > scaleMaxValue) value = scaleMaxValue;
 
+		if (dialInitialized && Math.abs(targetValue - value) < 0.001f) {
+			return;
+		}
 		targetValue = value;
 		dialInitialized = true;
+		invalidateIfVisible();
+		startDialAnimation();
+	}
 
-		invalidate(); // forces onDraw() to be called.
+	/** Jump the needle immediately (cluster self-test / reset). */
+	public void setValueImmediate(float value) {
+		if (value < scaleMinValue) value = scaleMinValue;
+		else if (value > scaleMaxValue) value = scaleMaxValue;
+		stopDialAnimation();
+		currentValue = value;
+		targetValue = value;
+		dialVelocity = 0.0f;
+		dialAcceleration = 0.0f;
+		dialInitialized = true;
+		invalidateIfVisible();
 	}
 
 	public float getValue() {
@@ -799,7 +968,59 @@ public final class Gauge extends View {
 	}
 
 	public void setOdoValue(float value) {
+		if (Math.abs(targetOdoValue - value) < 0.01f) {
+			return;
+		}
 		targetOdoValue = value;
-		invalidate();
+		updateCachedOdoText(value);
+		invalidateIfVisible();
+	}
+
+	/** Needle + odo in one invalidate (avoids double redraw per telemetry tick). */
+	public void setNeedleAndOdo(float needle, float odo) {
+		if (needle < scaleMinValue) needle = scaleMinValue;
+		else if (needle > scaleMaxValue) needle = scaleMaxValue;
+
+		boolean needleChanged = !dialInitialized || Math.abs(targetValue - needle) >= 0.001f;
+		boolean odoChanged = Math.abs(targetOdoValue - odo) >= 0.01f;
+		if (!needleChanged && !odoChanged) {
+			return;
+		}
+
+		if (needleChanged) {
+			targetValue = needle;
+			dialInitialized = true;
+			if (getVisibility() == VISIBLE) {
+				startDialAnimation();
+			} else {
+				// Keep hidden unit gauge in sync without scheduling frames
+				stopDialAnimation();
+				currentValue = needle;
+				dialVelocity = 0.0f;
+				dialAcceleration = 0.0f;
+			}
+		}
+		if (odoChanged) {
+			targetOdoValue = odo;
+			updateCachedOdoText(odo);
+		}
+		invalidateIfVisible();
+	}
+
+	/** Immediate needle + odo (self-test sweep). */
+	public void setNeedleAndOdoImmediate(float needle, float odo) {
+		if (needle < scaleMinValue) needle = scaleMinValue;
+		else if (needle > scaleMaxValue) needle = scaleMaxValue;
+		stopDialAnimation();
+		currentValue = needle;
+		targetValue = needle;
+		dialVelocity = 0.0f;
+		dialAcceleration = 0.0f;
+		dialInitialized = true;
+		if (Math.abs(targetOdoValue - odo) >= 0.01f) {
+			targetOdoValue = odo;
+			updateCachedOdoText(odo);
+		}
+		invalidateIfVisible();
 	}
 }

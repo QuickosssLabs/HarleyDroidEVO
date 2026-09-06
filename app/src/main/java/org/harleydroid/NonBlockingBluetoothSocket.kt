@@ -13,51 +13,32 @@
 //
 package org.harleydroid
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
+import android.content.Context
 import android.util.Log
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStream
 import java.util.UUID
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
-class NonBlockingBluetoothSocket : Thread() {
+class NonBlockingBluetoothSocket : NonBlockingLineTransport() {
 
     companion object {
         private const val D = false
         private val TAG = NonBlockingBluetoothSocket::class.java.simpleName
         private val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-        private const val CONNECT_TIMEOUT_MS = 15_000L
-
-        @JvmStatic
-        fun myGetBytes(s: String, start: Int, end: Int): ByteArray {
-            val result = ByteArray(end - start)
-            for (i in start until end) {
-                result[i - start] = s[i].code.toByte()
-            }
-            return result
-        }
-
-        @JvmStatic
-        fun myGetBytes(s: String): ByteArray = myGetBytes(s, 0, s.length)
     }
 
     private var mSock: BluetoothSocket? = null
-    private var mIn: BufferedReader? = null
-    private var mOut: OutputStream? = null
-    private var queue: LinkedBlockingQueue<String>? = null
 
     @Throws(IOException::class)
-    fun connect(device: BluetoothDevice) {
+    fun connect(context: Context, device: BluetoothDevice) {
         if (D) Log.d(TAG, "${System.currentTimeMillis()} connect")
 
         try {
-            BluetoothAdapter.getDefaultAdapter()?.cancelDiscovery()
+            val adapter =
+                (context.applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
+            adapter?.cancelDiscovery()
         } catch (_: SecurityException) {
         }
 
@@ -82,13 +63,10 @@ class NonBlockingBluetoothSocket : Thread() {
         }
 
         mSock = sock
-        mIn = BufferedReader(InputStreamReader(sock!!.inputStream), 128)
-        mOut = sock.outputStream
-        queue = LinkedBlockingQueue()
-        start()
+        startStreams(sock!!.inputStream, sock.outputStream, "NonBlockingBluetoothSocket Thread")
     }
 
-    fun close() {
+    override fun close() {
         if (D) Log.d(TAG, "${System.currentTimeMillis()} close()")
         val sock = mSock
         mSock = null
@@ -101,61 +79,5 @@ class NonBlockingBluetoothSocket : Thread() {
         }
     }
 
-    @Throws(TimeoutException::class)
-    fun readLine(timeout: Long): String {
-        val line = try {
-            queue?.poll(timeout, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            if (D) Log.e(TAG, "${System.currentTimeMillis()} readLine() interrupted: $e")
-            null
-        }
-        if (line == null) {
-            if (D) Log.d(TAG, "${System.currentTimeMillis()} readLine() timeout")
-            throw TimeoutException(null as String?)
-        }
-        if (D) Log.d(TAG, "${System.currentTimeMillis()} readLine (${line.length}): $line")
-        return line
-    }
-
-    @Throws(IOException::class)
-    fun writeLine(line: String) {
-        val out = mOut ?: throw IOException("socket closed")
-        val payload = "$line\r"
-        if (D) Log.d(TAG, "${System.currentTimeMillis()} writeLine: $payload")
-        out.write(myGetBytes(payload))
-        out.flush()
-    }
-
-    @Throws(IOException::class, TimeoutException::class)
-    fun chat(send: String, expect: String, timeout: Long): String {
-        val result = StringBuilder()
-        writeLine(send)
-        var remaining = timeout
-        try {
-            var start = System.currentTimeMillis()
-            while (remaining > 0) {
-                val line = readLine(remaining)
-                val now = System.currentTimeMillis()
-                remaining -= (now - start)
-                start = now
-                result.append(line).append('\n')
-                if (line.contains(expect)) return result.toString()
-            }
-            throw TimeoutException(null as String?)
-        } catch (e: TimeoutException) {
-            throw TimeoutException(result.toString())
-        }
-    }
-
-    override fun run() {
-        name = "NonBlockingBluetoothSocket Thread"
-        try {
-            while (true) {
-                val line = mIn?.readLine()?.trim().orEmpty()
-                if (line.isNotEmpty()) queue?.add(line)
-            }
-        } catch (e: IOException) {
-            if (D) Log.e(TAG, "${System.currentTimeMillis()} mReadThread exception: $e")
-        }
-    }
+    override fun tag(): String = TAG
 }

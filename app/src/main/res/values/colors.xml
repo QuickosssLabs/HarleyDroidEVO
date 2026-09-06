@@ -1,14 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Default accent (Orange) — also used as fallback resource names -->
     <color name="hd_primary">#FF6B1E</color>
     <color name="hd_on_primary">#FFFFFF</color>
-    <color name="hd_primary_container">#FFDBCB</color>
-    <color name="hd_secondary">#2C2C2C</color>
-    <color name="hd_surface">#121212</color>
-    <color name="hd_on_surface">#E8E8E8</color>
-    <color name="hd_toolbar">#1A1A1A</color>
+    <color name="hd_primary_container">#3D2318</color>
+    <color name="hd_primary_soft">#26FF6B1E</color>
+
+    <!-- Accent palettes (theme selectable) -->
+    <color name="hd_accent_orange">#FF6B1E</color>
+    <color name="hd_accent_orange_container">#3D2318</color>
+    <color name="hd_accent_orange_soft">#26FF6B1E</color>
+    <color name="hd_accent_orange_readout">#E8FF6B1E</color>
+
+    <color name="hd_accent_amber">#FFB300</color>
+    <color name="hd_accent_amber_container">#3D2E12</color>
+    <color name="hd_accent_amber_soft">#26FFB300</color>
+    <color name="hd_accent_amber_readout">#E8FFB300</color>
+
+    <color name="hd_accent_crimson">#E53935</color>
+    <color name="hd_accent_crimson_container">#3D1818</color>
+    <color name="hd_accent_crimson_soft">#26E53935</color>
+    <color name="hd_accent_crimson_readout">#E8E53935</color>
+
+    <color name="hd_accent_teal">#26A69A</color>
+    <color name="hd_accent_teal_container">#14302E</color>
+    <color name="hd_accent_teal_soft">#2626A69A</color>
+    <color name="hd_accent_teal_readout">#E826A69A</color>
+
+    <color name="hd_accent_blue">#42A5F5</color>
+    <color name="hd_accent_blue_container">#152A3D</color>
+    <color name="hd_accent_blue_soft">#2642A5F5</color>
+    <color name="hd_accent_blue_readout">#E842A5F5</color>
+
+    <color name="hd_accent_green">#66BB6A</color>
+    <color name="hd_accent_green_container">#1A2E1C</color>
+    <color name="hd_accent_green_soft">#2666BB6A</color>
+    <color name="hd_accent_green_readout">#E866BB6A</color>
+
+    <color name="hd_accent_silver">#B0BEC5</color>
+    <color name="hd_accent_silver_container">#2A3034</color>
+    <color name="hd_accent_silver_soft">#26B0BEC5</color>
+    <color name="hd_accent_silver_readout">#E8B0BEC5</color>
+
+    <!-- Neutrals — 60% base / 30% complementary -->
+    <color name="hd_surface">#0E0E0E</color>
+    <color name="hd_surface_elevated">#1A1A1A</color>
+    <color name="hd_surface_card">#222222</color>
+    <color name="hd_surface_row">#181818</color>
+    <color name="hd_toolbar">#161616</color>
+    <color name="hd_secondary">#2A2A2A</color>
+    <color name="hd_outline">#33FFFFFF</color>
+    <color name="hd_divider">#1FFFFFFF</color>
+
+    <!-- Text hierarchy via opacity -->
+    <color name="hd_on_surface">#F2F2F2</color>
+    <color name="hd_on_surface_80">#CCF2F2F2</color>
+    <color name="hd_on_surface_60">#99F2F2F2</color>
+    <color name="hd_on_surface_40">#66F2F2F2</color>
+
+    <!-- Status -->
     <color name="hd_status_ok">#2ECC71</color>
     <color name="hd_status_busy">#F5A623</color>
     <color name="hd_status_error">#E74C3C</color>
-    <color name="hd_status_idle">#555555</color>
+    <color name="hd_status_idle">#888888</color>
+    <color name="hd_status_link">#3498DB</color>
+    <color name="hd_sim_soft">#33F5A623</color>
+
+    <!-- Gauge / instrument cluster (defaults; runtime uses theme accent) -->
+    <color name="hd_gauge_scale">#C9B8A8</color>
+    <color name="hd_gauge_odo">#FF6B1E</color>
+    <color name="hd_gauge_odo_bg">#121212</color>
+    <color name="hd_gauge_ok">#9F2ECC71</color>
+    <color name="hd_gauge_warn">#9FF5A623</color>
+    <color name="hd_gauge_error">#9FE74C3C</color>
+    <color name="hd_gauge_readout">#E8FF6B1E</color>
+    <color name="hd_overlay_scrim">#99000000</color>
 </resources>

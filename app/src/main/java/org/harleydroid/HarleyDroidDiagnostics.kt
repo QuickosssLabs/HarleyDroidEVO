@@ -66,7 +66,7 @@ class HarleyDroidDiagnostics : HarleyDroid() {
         super.onCreate(savedInstanceState)
         setupShell(R.string.diagnostics_name)
         diagnosticsView = HarleyDroidDiagnosticsView(this)
-        diagnosticsView.changeView(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT)
+        // Inflate once in onStart (same pattern as dashboard)
     }
 
     override fun onStart() {
@@ -85,11 +85,12 @@ class HarleyDroidDiagnostics : HarleyDroid() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.diagnostics_menu, menu)
+        stripToolbarClickEffects()
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.startstop_menu)?.isEnabled = mBluetoothID != null || isEmulatorMode()
+        // Keep ▶ always tappable so first-time users get guidance instead of a dead button.
         if (mService != null) {
             menu.findItem(R.id.startstop_menu)?.setIcon(R.drawable.ic_menu_stop)
             menu.findItem(R.id.startstop_menu)?.setTitle(R.string.disconnect_label)
@@ -99,13 +100,13 @@ class HarleyDroidDiagnostics : HarleyDroid() {
             menu.findItem(R.id.startstop_menu)?.setTitle(R.string.connect_label)
             menu.findItem(R.id.cleardtc_menu)?.isEnabled = false
         }
-        return true
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.startstop_menu -> {
-                if (mService == null) ensureConnectPermissions(true) else stopHDS()
+                if (mService == null) requestConnect() else stopHDS()
                 return true
             }
             R.id.cleardtc_menu -> {
@@ -118,7 +119,10 @@ class HarleyDroidDiagnostics : HarleyDroid() {
                 return true
             }
             R.id.dash_menu -> {
-                startActivity(Intent(this, HarleyDroidDashboard::class.java))
+                startActivity(
+                    Intent(this, HarleyDroidDashboard::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                )
                 return true
             }
             R.id.preferences_menu -> {
@@ -135,6 +139,10 @@ class HarleyDroidDiagnostics : HarleyDroid() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun detachHarleyDataListeners() {
+        mHD?.removeHarleyDataDiagnosticsListener(diagnosticsView)
     }
 
     override fun onServiceConnected(name: android.content.ComponentName?, service: android.os.IBinder?) {
@@ -154,7 +162,7 @@ class HarleyDroidDiagnostics : HarleyDroid() {
     }
 
     override fun onServiceDisconnected(name: android.content.ComponentName?) {
-        mHD?.removeHarleyDataDiagnosticsListener(diagnosticsView)
+        detachHarleyDataListeners()
         diagnosticsView.drawAll(null)
         super.onServiceDisconnected(name)
     }

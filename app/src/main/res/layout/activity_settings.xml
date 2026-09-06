@@ -4,13 +4,15 @@
     android:id="@+id/settings_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/hd_surface"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/settings_app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/hd_toolbar">
+        android:background="@color/hd_toolbar"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
@@ -20,11 +22,19 @@
             app:navigationIcon="?attr/homeAsUpIndicator"
             app:popupTheme="@style/Theme.HarleyDroid.PopupOverlay"
             app:titleTextColor="@color/hd_on_surface" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:alpha="0.85"
+            android:background="?attr/colorPrimary" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@color/hd_surface"
+        android:paddingTop="@dimen/space_8" />
 </LinearLayout>

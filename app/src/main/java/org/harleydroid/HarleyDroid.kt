@@ -15,12 +15,15 @@ package org.harleydroid
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -69,8 +72,12 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     private var mBusProtocol: String = BusProtocol.J1850
     private var mBluetoothAdapter: BluetoothAdapter? = null
     protected var mBluetoothID: String? = null
+    private var mUseWifi = false
+    private var mWifiHost: String = ConnectionTransport.DEFAULT_WIFI_HOST
+    private var mWifiPort: Int = ConnectionTransport.DEFAULT_WIFI_PORT
     private var mEmulator = false
     private var mWarnedHdiCan = false
+    private var mWarnedHdiWifi = false
     private var mAutoConnect = false
     private var mAutoReconnect = false
     private var mReconnectDelay = "30"
@@ -90,10 +97,26 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     protected lateinit var connectionViewModel: ConnectionViewModel
     protected var toolbar: MaterialToolbar? = null
     private var toolbarTitle: TextView? = null
+    private var toolbarAccent: View? = null
     private var statusDot: View? = null
+    private var statusChip: View? = null
+    private var statusLabel: android.widget.TextView? = null
+    private var simBadge: TextView? = null
+    private var appliedThemeId: String? = null
 
     protected fun isEmulatorMode(): Boolean =
         if (::mPrefs.isInitialized) isEmulatorMode(mPrefs) else false
+
+    /** True when Simulation is on, or a Bluetooth / WiFi endpoint is configured. */
+    protected fun isConnectReady(): Boolean =
+        isEmulatorMode() ||
+            (mUseWifi && mWifiHost.isNotBlank()) ||
+            (!mUseWifi && !mBluetoothID.isNullOrBlank())
+
+    private fun needsBluetooth(): Boolean {
+        if (isEmulatorMode()) return false
+        return if (::mPrefs.isInitialized) !ConnectionTransport.isWifi(mPrefs) else !mUseWifi
+    }
 
     private val btEnableLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -107,7 +130,7 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
-        val needBt = !isEmulatorMode() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        val needBt = needsBluetooth() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         val btOk = if (needBt) {
             grants[Manifest.permission.BLUETOOTH_CONNECT] == true ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) ==
@@ -120,7 +143,7 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
             return@registerForActivityResult
         }
         mPermissionsReady = true
-        if (!isEmulatorMode()) onBluetoothReady()
+        if (needsBluetooth()) onBluetoothReady()
         if (pendingConnectAfterPerms) {
             pendingConnectAfterPerms = false
             startHDS()
@@ -128,6 +151,7 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppTheme.apply(this)
         super.onCreate(savedInstanceState)
         connectionViewModel = ViewModelProvider(this)[ConnectionViewModel::class.java]
         mHandler = HarleyDroidHandler(this)
@@ -135,6 +159,7 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         mEmulator = isEmulatorMode(mPrefs)
         mAutoConnect = true
+        appliedThemeId = AppTheme.currentId(mPrefs)
         if (Eula.show(this, false)) onEulaAgreedTo()
     }
 
@@ -143,7 +168,17 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         enterImmersiveMode()
         toolbar = findViewById(R.id.toolbar)
         toolbarTitle = findViewById(R.id.toolbar_title)
+        toolbarAccent = findViewById(R.id.toolbar_accent)
         statusDot = findViewById(R.id.status_dot)
+        statusChip = findViewById(R.id.status_chip)
+        statusLabel = findViewById(R.id.status_label)
+        simBadge = findViewById(R.id.sim_badge)
+        simBadge?.isSoundEffectsEnabled = false
+        statusChip?.isSoundEffectsEnabled = false
+        simBadge?.setOnClickListener {
+            startActivity(Intent(this, HarleyDroidSettings::class.java))
+        }
+        statusChip?.setOnClickListener { onStatusChipClicked() }
         applyEdgeToEdgeInsets(
             findViewById(R.id.app_bar),
             findViewById(R.id.content_container)
@@ -151,9 +186,113 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
         toolbarTitle?.setText(titleRes)
+        updateToolbarTitleVisibility()
+        updateSimulationBadge()
+        toolbar?.post { ClickEffects.strip(toolbar) }
         connectionViewModel.uiState.observe(this) { state ->
             updateStatusDot(state)
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateToolbarTitleVisibility(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+    }
+
+    /** Portrait: hide app name so status / SIM badges stay readable. */
+    private fun updateToolbarTitleVisibility(
+        portrait: Boolean = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    ) {
+        toolbarTitle?.visibility = if (portrait) View.GONE else View.VISIBLE
+        // Bring status chip closer to the logo when the title is hidden.
+        statusChip?.let { chip ->
+            val lp = chip.layoutParams
+            if (lp is android.view.ViewGroup.MarginLayoutParams) {
+                lp.marginStart = resources.getDimensionPixelSize(
+                    if (portrait) R.dimen.space_8 else R.dimen.space_12
+                )
+                chip.layoutParams = lp
+            }
+        }
+    }
+
+    override fun onPrepareOptionsMenu(menu: android.view.Menu): Boolean {
+        // Do not re-strip the whole toolbar tree here — that ran on every status tick
+        // and made taps feel laggy (users re-tap → several system clicks).
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    /** Call once after inflating an options menu (not on every prepare). */
+    protected fun stripToolbarClickEffects() {
+        toolbar?.post { ClickEffects.strip(toolbar) }
+    }
+
+    /**
+     * Drop HarleyData UI listeners before unbind. onServiceDisconnected is only for
+     * crashed services — without this, each Settings/Diag round-trip stacked listeners.
+     */
+    protected open fun detachHarleyDataListeners() {}
+
+    override fun startActivity(intent: Intent) {
+        super.startActivity(intent)
+        suppressPendingTransition(opening = true)
+    }
+
+    override fun startActivity(intent: Intent, options: Bundle?) {
+        super.startActivity(intent, options)
+        suppressPendingTransition(opening = true)
+    }
+
+    override fun finish() {
+        super.finish()
+        suppressPendingTransition(opening = false)
+    }
+
+    /** Instant screen changes (no slide) without using the deprecated transition API on 34+. */
+    private fun suppressPendingTransition(opening: Boolean) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(
+                if (opening) OVERRIDE_TRANSITION_OPEN else OVERRIDE_TRANSITION_CLOSE,
+                0,
+                0
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
+        }
+    }
+
+    /** Status pill: guide setup or explain how to connect — never silent. */
+    private fun onStatusChipClicked() {
+        when (connectionViewModel.uiState.value) {
+            is ConnectionUiState.Idle,
+            is ConnectionUiState.Error -> {
+                if (!isConnectReady()) {
+                    openSettingsForSetup()
+                } else {
+                    snack(R.string.snack_tap_play_to_connect)
+                }
+            }
+            else -> {
+                // Connected / busy — chip is informational only
+            }
+        }
+    }
+
+    protected fun openSettingsForSetup() {
+        startActivity(Intent(this, HarleyDroidSettings::class.java))
+    }
+
+    /**
+     * Connect entry point from ▶. Always gives feedback: either starts connect
+     * or explains that a Bluetooth / WiFi interface or Simulation must be configured.
+     */
+    protected fun requestConnect() {
+        if (!isConnectReady()) {
+            snackSetupNeeded()
+            return
+        }
+        ensureConnectPermissions(true)
     }
 
     /** Fullscreen dashboard: hide system bars; swipe from edge to reveal briefly. */
@@ -183,34 +322,57 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     }
 
     private fun updateStatusDot(state: ConnectionUiState) {
+        val chip = statusChip ?: return
         val dot = statusDot ?: return
-        val (colorRes, labelRes, show) = when (state) {
-            is ConnectionUiState.Idle ->
-                Triple(R.color.hd_status_idle, R.string.status_idle, false)
-            is ConnectionUiState.Connecting ->
-                Triple(R.color.hd_status_busy, R.string.status_connecting, true)
-            is ConnectionUiState.Connected ->
-                Triple(R.color.hd_status_ok, R.string.status_connected, true)
-            is ConnectionUiState.Polling ->
-                Triple(R.color.hd_status_ok, R.string.status_polling, true)
-            is ConnectionUiState.Diagnostics ->
-                Triple(R.color.hd_status_ok, R.string.status_diagnostics, true)
-            is ConnectionUiState.Reconnecting ->
-                Triple(R.color.hd_status_busy, R.string.status_reconnect, true)
-            is ConnectionUiState.Error ->
-                Triple(R.color.hd_status_error, R.string.status_error, true)
+        val needsSetup = state is ConnectionUiState.Idle && !isConnectReady()
+        val (colorRes, labelRes) = when {
+            needsSetup ->
+                R.color.hd_status_busy to R.string.status_setup_needed
+            state is ConnectionUiState.Idle ->
+                R.color.hd_status_idle to R.string.status_idle
+            state is ConnectionUiState.Connecting ->
+                R.color.hd_status_busy to R.string.status_connecting
+            state is ConnectionUiState.Connected ->
+                R.color.hd_status_link to R.string.status_connected
+            state is ConnectionUiState.Polling ->
+                R.color.hd_status_link to R.string.status_polling
+            state is ConnectionUiState.EngineOff ->
+                R.color.hd_status_busy to R.string.status_engine_off
+            state is ConnectionUiState.Running ->
+                R.color.hd_status_ok to R.string.status_running
+            state is ConnectionUiState.Diagnostics ->
+                R.color.hd_status_link to R.string.status_diagnostics
+            state is ConnectionUiState.Reconnecting ->
+                R.color.hd_status_busy to R.string.status_reconnect
+            state is ConnectionUiState.Error ->
+                R.color.hd_status_error to R.string.status_error
+            else ->
+                R.color.hd_status_idle to R.string.status_idle
         }
-        if (!show) {
-            dot.visibility = View.GONE
-            return
-        }
-        dot.visibility = View.VISIBLE
-        dot.contentDescription = when (state) {
+        val label = when (state) {
             is ConnectionUiState.Error -> statusMessage(state.status)
             else -> getString(labelRes)
         }
+        chip.visibility = View.VISIBLE
+        statusLabel?.text = label
+        chip.contentDescription = when {
+            needsSetup -> getString(R.string.status_setup_needed_desc)
+            state is ConnectionUiState.Idle || state is ConnectionUiState.Error ->
+                getString(R.string.status_idle_desc)
+            else -> label
+        }
+        dot.contentDescription = label
         dot.backgroundTintList =
             android.content.res.ColorStateList.valueOf(ContextCompat.getColor(this, colorRes))
+    }
+
+    private fun updateSimulationBadge() {
+        val sim = isEmulatorMode()
+        simBadge?.visibility = if (sim) View.VISIBLE else View.GONE
+        toolbarAccent?.setBackgroundColor(
+            if (sim) ContextCompat.getColor(this, R.color.hd_status_busy)
+            else AppTheme.primary(this)
+        )
     }
 
     private fun statusMessage(status: Int): String = when (status) {
@@ -222,15 +384,17 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
 
     override fun onEulaAgreedTo() {
         // Permissions deferred until connect / GPS logging
-        mPermissionsReady = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
+        mPermissionsReady = !needsBluetooth() ||
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
             ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) ==
             PackageManager.PERMISSION_GRANTED
-        if (mPermissionsReady) onBluetoothReady()
+        if (mPermissionsReady && needsBluetooth()) onBluetoothReady()
     }
 
     private fun onBluetoothReady() {
-        if (isEmulatorMode()) return
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (!needsBluetooth()) return
+        mBluetoothAdapter =
+            (getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)?.adapter
         if (mBluetoothAdapter == null) {
             mToast.setText(R.string.toast_nobluetooth)
             mToast.show()
@@ -248,20 +412,18 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
 
     fun ensureConnectPermissions(thenConnect: Boolean = true) {
         val needed = mutableListOf<String>()
-        if (!isEmulatorMode()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                    != PackageManager.PERMISSION_GRANTED
-                ) needed.add(Manifest.permission.BLUETOOTH_CONNECT)
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)
-                    != PackageManager.PERMISSION_GRANTED
-                ) needed.add(Manifest.permission.BLUETOOTH_SCAN)
-            }
-            if (mLogging && mGPS) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED
-                ) needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
+        if (needsBluetooth() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED
+            ) needed.add(Manifest.permission.BLUETOOTH_CONNECT)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN)
+                != PackageManager.PERMISSION_GRANTED
+            ) needed.add(Manifest.permission.BLUETOOTH_SCAN)
+        }
+        if (!isEmulatorMode() && mLogging && mGPS) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+            ) needed.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -273,17 +435,26 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
             permissionLauncher.launch(needed.toTypedArray())
         } else {
             mPermissionsReady = true
-            if (!isEmulatorMode()) onBluetoothReady()
+            if (needsBluetooth()) onBluetoothReady()
             if (thenConnect) startHDS()
         }
     }
 
     override fun onStart() {
         super.onStart()
+        val themeId = AppTheme.currentId(mPrefs)
+        if (appliedThemeId != null && appliedThemeId != themeId) {
+            recreate()
+            return
+        }
+        appliedThemeId = themeId
         mEmulator = isEmulatorMode(mPrefs)
         mInterfaceType = mPrefs.getString("interfacetype", null)
         mBusProtocol = BusProtocol.fromPrefs(mPrefs)
-        mBluetoothID = mPrefs.getString("bluetoothid", null)
+        mUseWifi = ConnectionTransport.isWifi(mPrefs)
+        mWifiHost = ConnectionTransport.wifiHost(mPrefs)
+        mWifiPort = ConnectionTransport.wifiPort(mPrefs)
+        mBluetoothID = mPrefs.getString("bluetoothid", null)?.takeIf { it.isNotBlank() }
         mAutoConnect = mAutoConnect && mPrefs.getBoolean("autoconnect", false)
         mAutoReconnect = mPrefs.getBoolean("autoreconnect", false)
         mReconnectDelay = mPrefs.getString("reconnectdelay", "30") ?: "30"
@@ -301,9 +472,11 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         mLogUnknown = mPrefs.getBoolean("logunknown", false)
         mScreenOn = mPrefs.getBoolean("screenon", false)
         mUnitMetric = mPrefs.getString("unit", "metric") == "metric"
+        updateSimulationBadge()
         invalidateOptionsMenu()
+        connectionViewModel.uiState.value?.let { updateStatusDot(it) }
         bindService(Intent(this, HarleyDroidService::class.java), this, 0)
-        if (mAutoConnect && (mBluetoothID != null || mEmulator) && mService == null) {
+        if (mAutoConnect && isConnectReady() && mService == null) {
             mAutoConnect = false
             ensureConnectPermissions(true)
         }
@@ -315,6 +488,7 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     }
 
     override fun onStop() {
+        detachHarleyDataListeners()
         super.onStop()
         try {
             unbindService(this)
@@ -331,19 +505,38 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
             mWarnedHdiCan = true
             snack(R.string.toast_hdi_can_forced_elm)
         }
+        if (mUseWifi && mInterfaceType == "hdi" && !mWarnedHdiWifi) {
+            mWarnedHdiWifi = true
+            snack(R.string.toast_hdi_wifi_forced_elm)
+        }
         if (!isEmulatorMode()) {
-            val adapter = mBluetoothAdapter ?: return
-            if (mBluetoothID == null) return
-            try {
+            if (!isConnectReady()) {
+                snackSetupNeeded()
+                return
+            }
+            if (mUseWifi) {
                 mService?.setInterfaceType(
                     mInterfaceType,
                     mBusProtocol,
-                    adapter.getRemoteDevice(mBluetoothID)
+                    null,
+                    true,
+                    mWifiHost,
+                    mWifiPort
                 )
-            } catch (e: SecurityException) {
-                mToast.setText(R.string.toast_errorenablebluetooth)
-                mToast.show()
-                return
+            } else {
+                val deviceId = mBluetoothID ?: return
+                val adapter = mBluetoothAdapter ?: return
+                try {
+                    mService?.setInterfaceType(
+                        mInterfaceType,
+                        mBusProtocol,
+                        adapter.getRemoteDevice(deviceId)
+                    )
+                } catch (e: SecurityException) {
+                    mToast.setText(R.string.toast_errorenablebluetooth)
+                    mToast.show()
+                    return
+                }
             }
         } else {
             mService?.setInterfaceType(mInterfaceType, mBusProtocol, null)
@@ -351,10 +544,12 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         mService?.setLogging(mLogging, mUnitMetric, mGPS, mLogRaw, mLogUnknown)
         mService?.setAutoReconnect(mAutoReconnect, mReconnectDelay.toInt())
         invalidateOptionsMenu()
+        stripToolbarClickEffects()
         if (mScreenOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
+        detachHarleyDataListeners()
         try {
             unbindService(this)
         } catch (_: IllegalArgumentException) {
@@ -401,17 +596,29 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
             }
             STATUS_NONE -> connectionViewModel.setState(ConnectionUiState.Idle)
         }
-        invalidateOptionsMenu()
+        // Menu icons only depend on mService bound — not on every status snack.
     }
 
     protected fun snack(res: Int) {
         val root = findViewById<android.view.View>(android.R.id.content)
-        Snackbar.make(root, res, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(root, res, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_FADE)
+            .show()
     }
 
     protected fun snack(msg: String) {
         val root = findViewById<android.view.View>(android.R.id.content)
-        Snackbar.make(root, msg, Snackbar.LENGTH_SHORT).show()
+        Snackbar.make(root, msg, Snackbar.LENGTH_SHORT)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_FADE)
+            .show()
+    }
+
+    protected fun snackSetupNeeded() {
+        val root = findViewById<View>(android.R.id.content)
+        Snackbar.make(root, R.string.snack_need_device, Snackbar.LENGTH_LONG)
+            .setAnimationMode(Snackbar.ANIMATION_MODE_FADE)
+            .setAction(R.string.snack_open_settings) { openSettingsForSetup() }
+            .show()
     }
 
     fun startHDS() {
@@ -422,9 +629,11 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
     }
 
     fun stopHDS() {
+        detachHarleyDataListeners()
         mService?.disconnect()
         mService = null
         connectionViewModel.setState(ConnectionUiState.Idle)
+        invalidateOptionsMenu()
     }
 
     class HarleyDroidHandler(activity: HarleyDroid) : Handler(Looper.getMainLooper()) {
