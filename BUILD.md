@@ -1,4 +1,4 @@
-HarleyDroid EVO 3.0
+HarleyDroid EVO 3.2
 ===================
 
 Open-source Harley-Davidson J1850 / CAN analyser for Android (ELM327 / HDI).
@@ -34,8 +34,8 @@ Publier une nouvelle version :
 2. Commit + push sur `main`.
 3. Créer et pousser un tag sémantique :
 
-       git tag v3.0-EVO
-       git push origin v3.0-EVO
+       git tag v3.2-EVO
+       git push origin v3.2-EVO
 
 4. Le workflow `.github/workflows/release.yml` compile l’APK et crée
    automatiquement la Release GitHub avec le fichier joint
@@ -84,12 +84,14 @@ Dans Préférences → **Type de bus** :
 - **CAN / HDLAN (6 pins)** — lecture passive (ELM327 `ATSP6` + `CAF0` + `ATMA`)
 
 CAN V1 = télémétrie tableau de bord uniquement (vitesse, odo, température, etc.).
-Les diagnostics actifs (DTC / VIN) restent réservés au J1850.
+Les diagnostics actifs (DTC / VIN / clear) restent **J1850-only** tant qu’aucune
+capture de requête/réponse CAN n’est validée (pas de protocole inventé).
 
 Matériel CAN : ELM327 **compatible CAN 500 kbit/s** + câble Deutsch 6 pins.
 L’interface HDI est J1850-only ; en mode CAN l’app bascule automatiquement sur ELM327.
 
-Les layouts d’octets CAN varient selon modèles / années — calibrer via logs bruts.
+Sans moto 6 pins : utiliser la simulation CAN pour l’UI, et contribuer des logs
+bruts si vous avez accès à une Harley HDLAN (voir README § CAN).
 
 Permissions / confidentialité
 -----------------------------

@@ -23,6 +23,32 @@
 <string name="app_name">HarleyDroidEVO</string>
 <string name="dashboard_name">HarleyDroidEVO</string>
 <string name="diagnostics_name">Diagnostics</string>
+<string name="logs_name">Logs</string>
+<string name="logs_label">Voir les logs</string>
+<string name="live_chart_name">Graphique live</string>
+<string name="live_chart_label">Graphique live</string>
+<string name="live_chart_waiting">Connectez-vous pour afficher le flux…</string>
+<string name="live_chart_readout_dual">%1$s · %2$s</string>
+<string name="live_chart_readout_single">%1$s</string>
+<string name="logs_empty">Aucun fichier de log.\nActivez l\'enregistrement dans les réglages, puis roulez avec le tableau de bord connecté.</string>
+<string name="logs_item_meta">%1$s · %2$s · %3$s · %4$s</string>
+<string name="logs_share">Partager</string>
+<string name="logs_delete">Supprimer</string>
+<string name="logs_delete_title">Supprimer le log ?</string>
+<string name="logs_delete_message">Supprimer définitivement %1$s ?</string>
+<string name="logs_delete_failed">Impossible de supprimer le log</string>
+<string name="logs_open_failed">Impossible d\'ouvrir le log</string>
+<string name="logs_chart_legend">Plein = Régime · Pointillé = Vitesse</string>
+<string name="logs_chart_legend_hint">Choisir jusqu\'à 2 métriques</string>
+<string name="logs_chart_legend_dual">Plein = %1$s · Pointillé = %2$s</string>
+<string name="logs_chart_legend_single">Plein = %1$s</string>
+<string name="logs_chart_hint">Chargement…</string>
+<string name="logs_chart_empty">Aucun échantillon traçable dans ce log</string>
+<string name="logs_chart_summary">Durée %1$s · RPM max %2$s · Vitesse max %3$s\nGlisser sur le graphique pour inspecter</string>
+<string name="logs_chart_summary_full">Durée %1$s · RPM max %2$s · Vitesse max %3$s · ETP max %4$s · Trajet %5$s\nGlisser sur le graphique pour inspecter</string>
+<string name="logs_chart_scrub">t %1$s · RPM %2$s · SPD %3$s</string>
+<string name="logs_chart_scrub_dual">t %1$s · %2$s · %3$s</string>
+<string name="logs_chart_scrub_single">t %1$s · %2$s</string>
 <string name="settings_name">Préférences</string>
 
 <string name="toast_nobluetooth">Désolé, votre appareil ne supporte pas le Bluetooth</string>
@@ -92,7 +118,11 @@
 <string name="resetcounters_label">RAZ</string>
 <string name="about_label">A propos</string>
 
-<string name="cleardtc_label">Effacer erreurs historiques</string>
+<string name="cleardtc_label">Effacer les codes défaut</string>
+<string name="cleardtc_dialog_title">Effacer les codes défaut</string>
+<string name="cleardtc_dialog_message">Choisir les modules à effacer. Les codes sont effacés sur la moto, puis un nouveau scan démarre.</string>
+<string name="cleardtc_confirm">Effacer</string>
+<string name="cleardtc_none_selected">Sélectionner au moins un module</string>
 
 <string name="notification_label">HarleyDroidEVO</string>
 <string name="notification_connecting">Connexion en cours&#8230;</string>
@@ -252,7 +282,12 @@
 <string name="privacy_note">HarleyDroidEVO utilise le Bluetooth ou le WiFi/TCP local pour parler à votre interface ELM327, et le GPS uniquement si l\'enregistrement avec GPS est activé.</string>
 <string name="dtc_current_title">Défauts courants</string>
 <string name="dtc_historic_title">Défauts historiques</string>
+<string name="dtc_module_ecm">ECM</string>
+<string name="dtc_module_abs">ABS</string>
+<string name="dtc_module_tsm">TSM / TSSM</string>
 <string name="dtc_empty">Aucun code défaut</string>
+<string name="dtc_unknown_desc">Code défaut inconnu</string>
+<string name="dtc_unknown_desc_fmt">%1$s — description inconnue</string>
 <string name="vin_tap_hint">Appuyer sur le VIN pour les détails</string>
 
 </resources>

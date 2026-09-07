@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/space_16">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/space_12"
+        android:text="@string/cleardtc_dialog_message"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Body"
+        android:textColor="@color/hd_on_surface_80" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/clear_ecm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:minHeight="@dimen/tap_min"
+        android:text="@string/dtc_module_ecm"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Value"
+        android:textColor="@color/hd_on_surface" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/clear_abs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:minHeight="@dimen/tap_min"
+        android:text="@string/dtc_module_abs"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Value"
+        android:textColor="@color/hd_on_surface" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/clear_tsm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:minHeight="@dimen/tap_min"
+        android:text="@string/dtc_module_tsm"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Value"
+        android:textColor="@color/hd_on_surface" />
+</LinearLayout>

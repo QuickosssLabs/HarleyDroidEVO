@@ -48,12 +48,12 @@ jobs:
 
             ### Highlights
 
-            - UI Material 3 : thème sombre, branding, status pills, cartes diagnostics
-            - Jauges modernisées (cadrans + LCD) et barres verticales FUEL / TEMP
-            - Self-test cluster à la connexion + mode simulation (`SIM`)
-            - Thèmes de couleur et choix de langue (EN / FR)
-            - Bus dual J1850 (4 pins) + CAN / HDLAN (6 pins, télémétrie passive)
-            - Captures : voir [README.md](https://github.com/QuickosssLabs/HarleyDroidEVO/blob/main/README.md#screenshots)
+            - Logs in-app : liste, replay graphique (RPM / vitesse / …), scrub
+            - Graphique live (~60 s) pendant la connexion
+            - Diagnostics J1850 par module (ECM / ABS / TSM) + clear sélectif
+            - UI Material 3, jauges, simulation, thèmes, EN / FR
+            - CAN / HDLAN : télémétrie passive uniquement (DTC actifs = J1850 pour l’instant)
+            - Détail : [README.md](https://github.com/QuickosssLabs/HarleyDroidEVO/blob/main/README.md) · [RELEASE_NOTES.md](https://github.com/QuickosssLabs/HarleyDroidEVO/blob/main/RELEASE_NOTES.md)
 
             ### Build
 

@@ -36,8 +36,9 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	private var mECMSWLevel = 0
 	private var mFuelAverage = -1
 	private var mFuelInstant = 1
-	private val mHistoricDTC = CopyOnWriteArrayList<String>()
-	private val mCurrentDTC = CopyOnWriteArrayList<String>()
+	private val mModuleDtc = DtcModule.entries.associateWith {
+		CopyOnWriteArrayList<String>()
+	}
 
 	private var mResetOdometer = -1
 	private var mResetFuel = -1
@@ -379,50 +380,33 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 			l.onECMSWLevelChanged(mECMSWLevel)
 	}
 
-	fun getHistoricDTC(): Array<String> {
-		val dtclist = Array(mHistoricDTC.size) { "" }
-		var i = 0
-		for (n in mHistoricDTC)
-			dtclist[i++] = n
-		return dtclist
+	fun getDtc(module: DtcModule): Array<String> {
+		val list = mModuleDtc[module] ?: return emptyArray()
+		return Array(list.size) { i -> list[i] }
 	}
 
-	fun resetHistoricDTC() {
-		mHistoricDTC.clear()
-		val dtclist = getHistoricDTC()
+	fun resetAllDtc() {
+		for (module in DtcModule.entries) {
+			mModuleDtc[module]?.clear()
+			notifyModuleDtc(module)
+		}
+	}
+
+	fun resetDtc(module: DtcModule) {
+		mModuleDtc[module]?.clear()
+		notifyModuleDtc(module)
+	}
+
+	fun addDtc(module: DtcModule, dtc: String) {
+		val list = mModuleDtc[module] ?: return
+		if (!list.contains(dtc)) list.add(dtc)
+		notifyModuleDtc(module)
+	}
+
+	private fun notifyModuleDtc(module: DtcModule) {
+		val dtclist = getDtc(module)
 		for (l in mDiagnosticsListeners)
-			l.onHistoricDTCChanged(dtclist)
-	}
-
-	fun addHistoricDTC(dtc: String) {
-		if (!mHistoricDTC.contains(dtc))
-			mHistoricDTC.add(dtc)
-		val dtclist = getHistoricDTC()
-		for (l in mDiagnosticsListeners)
-			l.onHistoricDTCChanged(dtclist)
-	}
-
-	fun getCurrentDTC(): Array<String> {
-		val dtclist = Array(mCurrentDTC.size) { "" }
-		var i = 0
-		for (n in mCurrentDTC)
-			dtclist[i++] = n
-		return dtclist
-	}
-
-	fun resetCurrentDTC() {
-		mCurrentDTC.clear()
-		val dtclist = getCurrentDTC()
-		for (l in mDiagnosticsListeners)
-			l.onCurrentDTCChanged(dtclist)
-	}
-
-	fun addCurrentDTC(dtc: String) {
-		if (!mCurrentDTC.contains(dtc))
-			mCurrentDTC.add(dtc)
-		val dtclist = getCurrentDTC()
-		for (l in mDiagnosticsListeners)
-			l.onCurrentDTCChanged(dtclist)
+			l.onModuleDtcChanged(module, dtclist)
 	}
 
 	fun setBadCRC(buffer: ByteArray) {

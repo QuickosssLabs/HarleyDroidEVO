@@ -136,6 +136,17 @@ class HarleyDroidDashboard : HarleyDroid() {
                 )
                 return true
             }
+            R.id.logs_menu -> {
+                startActivity(Intent(this, HarleyDroidLogs::class.java))
+                return true
+            }
+            R.id.live_chart_menu -> {
+                startActivity(
+                    Intent(this, HarleyDroidLiveChart::class.java)
+                        .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                )
+                return true
+            }
             R.id.preferences_menu -> {
                 startActivity(Intent(this, HarleyDroidSettings::class.java))
                 return true

@@ -507,7 +507,16 @@ public class EmulatorInterface implements J1850Interface
 					if (D) Log.d(TAG, "send: " + mType[i] + "-" + mTA[i] + "-" +
 							 mSA[i] + "-" + command + "-" + mExpect[i]);
 
-					String line = "6CF1105901341167";
+					String line;
+					if ("40".equalsIgnoreCase(mTA[i])) {
+						line = j1850Frame(new byte[]{0x6c, (byte)0xf1, 0x40, 0x59, 0x41, 0x51});
+					} else if ("60".equalsIgnoreCase(mTA[i])) {
+						line = j1850Frame(new byte[]{0x6c, (byte)0xf1, 0x60, 0x59, (byte)0xd0, 0x64});
+					} else if (mCommand[i] != null && mCommand[i].startsWith("19")) {
+						line = j1850Frame(new byte[]{0x6c, (byte)0xf1, 0x10, 0x59, 0x01, 0x34});
+					} else {
+						line = j1850Frame(new byte[]{0x6c, (byte)0xf1, 0x10, 0x59, 0x01, 0x34});
+					}
 
 					byte[] bytes = line.getBytes();
 					mHD.setRaw(bytes);

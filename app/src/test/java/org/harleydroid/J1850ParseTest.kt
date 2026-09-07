@@ -78,6 +78,28 @@ class J1850ParseTest {
         assertEquals(true, data.getFuelLow())
     }
 
+    @Test
+    fun parsesDtcByModule() {
+        // ECM P0134
+        assertTrue(parseFrame(byteArrayOf(0x6c, 0xf1.toByte(), 0x10, 0x59, 0x01, 0x34)))
+        assertEquals(arrayOf("P0134").toList(), data.getDtc(DtcModule.ECM).toList())
+
+        // ABS C1151
+        assertTrue(parseFrame(byteArrayOf(0x6c, 0xf1.toByte(), 0x40, 0x59, 0x41, 0x51)))
+        assertEquals(arrayOf("C1151").toList(), data.getDtc(DtcModule.ABS).toList())
+
+        // TSM U1064 (was previously dropped as unknown)
+        assertTrue(parseFrame(byteArrayOf(0x6c, 0xf1.toByte(), 0x60, 0x59, 0xd0.toByte(), 0x64)))
+        assertEquals(arrayOf("U1064").toList(), data.getDtc(DtcModule.TSM).toList())
+    }
+
+    private fun parseFrame(payload: ByteArray): Boolean {
+        val need = (J1850.crc(payload).toInt().inv() and 0xff).toByte()
+        val sb = StringBuilder()
+        for (b in payload + need) sb.append(String.format("%02X", b.toInt() and 0xff))
+        return J1850.parse(sb.toString().toByteArray(), data)
+    }
+
     private class MemPrefs : SharedPreferences {
         private val map = HashMap<String, Any?>()
         override fun getAll(): MutableMap<String, *> = map

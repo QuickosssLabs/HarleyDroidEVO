@@ -9,9 +9,9 @@ Evolution (EVO) engine.
   <img src="docs/screenshots/dashboard-simulation-landscape.png" alt="Dashboard gauges in simulation (landscape)" width="720">
 </p>
 
-**Version:** 3.0-EVO · targetSdk / compileSdk 35 · minSdk 21  
+**Version:** 3.2-EVO · targetSdk / compileSdk 35 · minSdk 21  
 **APK downloads:** [GitHub Releases](https://github.com/QuickosssLabs/HarleyDroidEVO/releases)  
-**Build notes:** [BUILD.md](BUILD.md)
+**Build notes:** [BUILD.md](BUILD.md) · **Release notes:** [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
 ---
 
@@ -73,7 +73,8 @@ Metric cards for RPM, speed, temp, fuel, gear, trip, economy, switches, etc.
 |:--------:|:---------:|:-------------------:|
 | ![Diag portrait](docs/screenshots/diagnostics-portrait.png) | ![Diag landscape](docs/screenshots/diagnostics-landscape.png) | ![Clear historic DTC](docs/screenshots/diagnostics-clear-historic-dtc-portrait.png) |
 
-VIN / ECM info, current & historic DTCs (J1850). Tap VIN for decoded details.
+VIN / ECM info and **DTCs by module** (ECM / ABS / TSM) on J1850. Selective
+clear via dialog. Tap a code for its description. Tap VIN for decoded details.
 
 ### Settings, about & licence
 
@@ -84,6 +85,14 @@ VIN / ECM info, current & historic DTCs (J1850). Tap VIN for decoded details.
 ---
 
 ## What’s new in HarleyDroid EVO
+
+### 3.2 — Logs, live graph, module DTCs
+
+- **View logs** — browse `.log.gz`, share / delete, open a replay chart
+- Replay: up to two metrics (RPM, SPD, ETP, GER, ODO, FUL, FGE) with time scrub
+- **Live graph** — ~60 s sliding window while connected (same metric chips)
+- Diagnostics: DTCs per **ECM / ABS / TSM**; selective clear; richer DTC dictionary
+- Session summary on replay (max RPM / SPD / ETP, trip from ODO)
 
 ### Android platform
 
@@ -122,10 +131,11 @@ VIN / ECM info, current & historic DTCs (J1850). Tap VIN for decoded details.
 ### Dual bus (J1850 + CAN)
 
 - Same app and dashboard for both connector generations
-- J1850 unchanged (`ATSP2` + `ATMA`, full diagnostics as before)
-- CAN V1: passive dashboard telemetry (speed, odo, temp, switches…)
-- Active diagnostics (DTC / VIN / ECM queries) remain J1850-only in V1
-- VIN decoder dialog when a VIN is available
+- **J1850** — full path: dashboard `ATMA` + active diagnostics (VIN / ECM / DTC read & clear)
+- **CAN V1** — passive dashboard telemetry only (see [CAN section](#harley-can--hdlan-protocol-evo-v1))
+- Active DTC / VIN over CAN are **not** implemented until validated request/response
+  captures exist (no guessed protocol)
+- VIN decoder dialog when a VIN is available (J1850)
 
 ---
 
@@ -286,13 +296,33 @@ Clear reply:     6C F1 .. 54 …
 ```
 
 Exact TA/SA used by the app live in `HarleyDroidDiagnostics`
-(ECM / ABS / other nodes as `10` / `40` / `60`).
+(ECM `10` / ABS `40` / TSM `60`). DTCs are stored and shown **per module**;
+clear can target a subset of modules.
 
 Implementation: `app/src/main/java/org/harleydroid/J1850.kt`
 
 ---
 
 ## Harley CAN / HDLAN protocol (EVO V1)
+
+### What works today vs what does not
+
+| Feature | J1850 (4-pin) | CAN / HDLAN (6-pin) |
+|---------|---------------|---------------------|
+| Live dashboard (speed, temp, …) | Yes | Yes (passive / best-effort) |
+| Simulation | Yes | Yes |
+| Log / replay / live graph | Yes | Yes (from decoded metrics) |
+| Read VIN / ECM info | Yes | **No** (V1) |
+| Read / clear DTCs | Yes (ECM / ABS / TSM) | **No** (V1) |
+
+Active CAN diagnostics need reverse-engineered **request/response** frames
+(addressed UDS-style or Harley-specific), which vary by model and year. The
+project will not invent those commands: a wrong clear or query is worse than
+an honest “unsupported” banner.
+
+If you only have a 4-pin bike (or no CAN hardware), focus on J1850 — that is
+the fully supported diagnostic path. Keep bus type on **J1850**, use
+simulation for UI demos, and treat CAN as optional telemetry.
 
 ### Disclaimer
 
@@ -340,16 +370,30 @@ CAN:    ATSP6, CAF0
         Diagnostics: not supported in V1
 ```
 
-### How to contribute new frames
+### How to contribute CAN (telemetry or future DTC)
 
-1. Capture with “log raw / unknown” enabled (and the matching bus type)
-2. Note hex line + riding context (speed, gear, temp, etc.)
-3. Propose id + scaling (and bike model/year if known)
-4. Ideally add a unit test beside `J1850ParseTest` or `HarleyCanParseTest`
+**Passive map improvements (any 6-pin owner):**
+
+1. Preferences → bus **CAN / HDLAN**, enable **log raw / unknown**
+2. Capture a short ride; note model / year and what the cluster showed
+3. Open an issue or PR with the `.log.gz` (or hex excerpts) + proposed ID/scaling
+4. Add a unit test beside `HarleyCanParseTest` when possible
+
+**Active diagnostics (DTC / VIN) — only with proof:**
+
+1. Same raw logging while a known tool (or careful ELM session) queries DTCs
+2. Pair request hex + response hex + resulting codes on the bike
+3. Document address / service / payload; submit fixtures for automated tests
+4. Maintainers will wire the same module UI used for J1850 once captures validate
+
+Without those captures, CAN stays **listen-only** on purpose.
 
 ---
 
 ## HarleyDroid EVO log format
+
+Logs are CSV gzip files (`harley-*.log.gz`). Open them in-app via **View logs**
+(dashboard menu) for replay charts, or use **Live graph** while connected.
 
 Logs are CSV:
 
@@ -357,7 +401,7 @@ Logs are CSV:
 timestamp,type,value,longitude,latitude,altitude,date
 ```
 
-Timestamp format: `YYYYMMDDhhmmss`.
+Timestamp format: `YYYYMMDDhhmmss` (milliseconds may be appended).
 
 Type/value combinations (depending on metric/imperial settings):
 
@@ -375,7 +419,8 @@ Type/value combinations (depending on metric/imperial settings):
 | `FUL` | fuel used (ml or fl oz) |
 | `FGE` | fuel gauge 0–6 or EMPTY |
 | `VIN` / `EPN` / `ECI` / `ESL` | VIN / ECM PN / calib / SW level |
-| `DTH` / `DTC` | historic / current DTCs |
+| `DTC` | DTCs (`DTC,<MODULE>,code,…` — ECM / ABS / TSM) |
+| `DTH` | legacy historic DTC lines (older logs) |
 | `RAW` | raw bus line (if enabled) |
 | `CRC` | bad J1850 message |
 | `UNK` | unknown bus message |
@@ -384,5 +429,6 @@ Type/value combinations (depending on metric/imperial settings):
 
 Original author: Stelian Pop \<stelian@popies.net\>  
 HarleyDroid EVO: Quickosss (2026) — Android modernization, Material UI,
-dual-bus J1850 (4-pin) + CAN/HDLAN (6-pin), simulation mode, modern gauges  
+dual-bus J1850 (4-pin) + CAN/HDLAN (6-pin), simulation, gauges, log charts,
+module DTCs  
 Licence: GNU GPL v3 or later ([COPYING](COPYING))

@@ -21,6 +21,42 @@
 <resources>
 
 <string-array name="dtc_codes">
+	<item>B1004</item>
+	<item>B1005</item>
+	<item>B1006</item>
+	<item>B1007</item>
+	<item>B1008</item>
+	<item>B1121</item>
+	<item>B1122</item>
+	<item>B1131</item>
+	<item>B1132</item>
+	<item>B1134</item>
+	<item>B1135</item>
+	<item>B1136</item>
+	<item>B1141</item>
+	<item>B1142</item>
+	<item>B1143</item>
+	<item>B1144</item>
+	<item>B1145</item>
+	<item>B1151</item>
+	<item>B1152</item>
+	<item>B1153</item>
+	<item>B1154</item>
+	<item>B1155</item>
+	<item>B2006</item>
+	<item>B2007</item>
+	<item>B2008</item>
+	<item>B2009</item>
+	<item>B2010</item>
+	<item>B2011</item>
+	<item>B2012</item>
+	<item>B2013</item>
+	<item>B2112</item>
+	<item>B2113</item>
+	<item>B2114</item>
+	<item>B2141</item>
+	<item>B2272</item>
+	<item>B2274</item>
 	<item>C0562</item>
 	<item>C0563</item>
 	<item>C1014</item>
@@ -154,6 +190,42 @@
 	<item>U1301</item>
 </string-array>
 <string-array name="dtc_strings">
+	<item>B1004 Fuel Level Sending Unit Low</item>
+	<item>B1005 Fuel Level Sending Unit High / Open</item>
+	<item>B1006 Accessory Line Overvoltage</item>
+	<item>B1007 Ignition Line Overvoltage</item>
+	<item>B1008 Trip Odometer Reset Switch Closed</item>
+	<item>B1121 Left Turn Output Fault</item>
+	<item>B1122 Right Turn Output Fault</item>
+	<item>B1131 Alarm Output Low</item>
+	<item>B1132 Alarm Output High</item>
+	<item>B1134 Starter Output High</item>
+	<item>B1135 Accelerometer Fault</item>
+	<item>B1136 Accelerometer Tip-Over Self Test Fault</item>
+	<item>B1141 Ignition Switch Open / Low</item>
+	<item>B1142 Smart Security System Internal Fault</item>
+	<item>B1143 Security Antenna Short to Ground</item>
+	<item>B1144 Security Antenna Short to Battery / Open</item>
+	<item>B1145 Accelerometer Failed</item>
+	<item>B1151 Sidecar BAS Low</item>
+	<item>B1152 Sidecar BAS High</item>
+	<item>B1153 Sidecar BAS Out of Range</item>
+	<item>B1154 Clutch Switch Input Shorted Low</item>
+	<item>B1155 Neutral Switch Input Shorted Low</item>
+	<item>B2006 Radio Button Stuck</item>
+	<item>B2007 Handlebar Switch Shorted / Stuck</item>
+	<item>B2008 Handlebar Switch Open / Stuck</item>
+	<item>B2009 Handlebar Switch Shorted / Stuck</item>
+	<item>B2010 Handlebar Switch Open / Stuck</item>
+	<item>B2011 Switch Out of Range</item>
+	<item>B2012 Speedometer Voltage Low</item>
+	<item>B2013 Speedometer Voltage High</item>
+	<item>B2112 Fuel Sender Low</item>
+	<item>B2113 Fuel Sender High / Open</item>
+	<item>B2114 Fuel Reserve LED Output Fault</item>
+	<item>B2141 Ignition Switch Open / Low</item>
+	<item>B2272 Fuel Sender Low</item>
+	<item>B2274 Fuel Sender High / Open</item>
 	<item>C0562 System Voltage Low</item>
 	<item>C0563 System Voltage High</item>
 	<item>C1014 ECU Internal Solid State Relay Fault</item>

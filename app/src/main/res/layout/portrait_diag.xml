@@ -85,56 +85,88 @@
     </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
-        android:id="@+id/dtc1_layout"
+        android:id="@+id/dtc_modules_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/space_16"
         android:layout_weight="1"
-        android:background="@drawable/bg_section_card"
-        android:orientation="vertical"
-        android:padding="@dimen/space_12">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/currentdtc_label"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_8"
-            android:text="@string/dtc_current_title"
-            android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_section_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_12">
 
-        <ListView
-            android:id="@+id/currentdtc_field"
+            <TextView
+                android:id="@+id/ecmdtc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_8"
+                android:text="@string/dtc_module_ecm"
+                android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+
+            <ListView
+                android:id="@+id/ecmdtc_field"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/hd_divider"
+                android:dividerHeight="1dp"
+                android:paddingTop="@dimen/space_4" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@color/hd_divider"
-            android:dividerHeight="1dp"
-            android:paddingTop="@dimen/space_4" />
-    </LinearLayout>
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/space_8"
+            android:layout_weight="1"
+            android:background="@drawable/bg_section_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_12">
 
-    <LinearLayout
-        android:id="@+id/dtc2_layout"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/space_12"
-        android:layout_weight="1"
-        android:background="@drawable/bg_section_card"
-        android:orientation="vertical"
-        android:padding="@dimen/space_12">
+            <TextView
+                android:id="@+id/absdtc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_8"
+                android:text="@string/dtc_module_abs"
+                android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
 
-        <TextView
-            android:id="@+id/historicdtc_label"
+            <ListView
+                android:id="@+id/absdtc_field"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/hd_divider"
+                android:dividerHeight="1dp"
+                android:paddingTop="@dimen/space_4" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_8"
-            android:text="@string/dtc_historic_title"
-            android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/space_8"
+            android:layout_weight="1"
+            android:background="@drawable/bg_section_card"
+            android:orientation="vertical"
+            android:padding="@dimen/space_12">
 
-        <ListView
-            android:id="@+id/historicdtc_field"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@color/hd_divider"
-            android:dividerHeight="1dp"
-            android:paddingTop="@dimen/space_4" />
+            <TextView
+                android:id="@+id/tsmdtc_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_8"
+                android:text="@string/dtc_module_tsm"
+                android:textAppearance="@style/TextAppearance.HarleyDroid.Section" />
+
+            <ListView
+                android:id="@+id/tsmdtc_field"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/hd_divider"
+                android:dividerHeight="1dp"
+                android:paddingTop="@dimen/space_4" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

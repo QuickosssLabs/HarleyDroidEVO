@@ -202,16 +202,12 @@ object J1850 {
 					dtc += Integer.toString((`in`[5].toInt() and 0xf0) shr 4, 16)
 					dtc += Integer.toString(`in`[5].toInt() and 0x0f, 16)
 					dtc = dtc.uppercase()
-					when (`in`[2].toInt()) {
-						0x10 -> {
-							if (D) Log.d(TAG, "historic DTC: $dtc")
-							hd.addHistoricDTC(dtc)
-						}
-						0x40 -> {
-							if (D) Log.d(TAG, "current DTC: $dtc")
-							hd.addCurrentDTC(dtc)
-						}
-						else -> hd.setUnknown(buffer)
+					val module = DtcModule.fromAddress(`in`[2].toInt())
+					if (module != null) {
+						if (D) Log.d(TAG, "DTC ${module.name}: $dtc")
+						hd.addDtc(module, dtc)
+					} else {
+						hd.setUnknown(buffer)
 					}
 				}
 			}

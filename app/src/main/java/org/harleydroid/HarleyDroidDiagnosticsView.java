@@ -2,19 +2,14 @@
 // HarleyDroid: Harley Davidson J1850 Data Analyser for Android.
 //
 // Copyright (C) 2010-2012 Stelian Pop <stelian@popies.net>
+// Copyright (C) 2026 Quickosss - HarleyDroid EVO (maintenance / modernization)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// See COPYING for the full licence text.
 //
 
 package org.harleydroid;
@@ -23,7 +18,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -50,19 +44,18 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 	public static final int UPDATE_ECMPN = 2;
 	public static final int UPDATE_ECMCALID = 3;
 	public static final int UPDATE_ECMSWLEVEL = 4;
-	public static final int UPDATE_HISTORICDTC = 5;
-	public static final int UPDATE_CURRENTDTC = 6;
+	public static final int UPDATE_MODULE_DTC = 5;
 
 	private Activity mActivity;
 	private HarleyDroidDiagnosticsViewHandler mHandler;
 
-	// Views references cached for performance
 	private MaterialButton mViewVIN;
 	private TextView mViewECMPN;
 	private TextView mViewECMCalID;
 	private TextView mViewECMSWLevel;
-	private ListView mViewCurrentDTC;
-	private ListView mViewHistoricDTC;
+	private ListView mViewEcmDtc;
+	private ListView mViewAbsDtc;
+	private ListView mViewTsmDtc;
 	private int mInstalledLayoutRes = 0;
 	private boolean mInstalledPortrait;
 
@@ -102,15 +95,21 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 		mViewECMPN = (TextView) mActivity.findViewById(R.id.ecmpn_field);
 		mViewECMCalID = (TextView) mActivity.findViewById(R.id.ecmcalid_field);
 		mViewECMSWLevel = (TextView) mActivity.findViewById(R.id.ecmswlevel_field);
-		mViewCurrentDTC = (ListView) mActivity.findViewById(R.id.currentdtc_field);
-		mViewHistoricDTC = (ListView) mActivity.findViewById(R.id.historicdtc_field);
+		mViewEcmDtc = (ListView) mActivity.findViewById(R.id.ecmdtc_field);
+		mViewAbsDtc = (ListView) mActivity.findViewById(R.id.absdtc_field);
+		mViewTsmDtc = (ListView) mActivity.findViewById(R.id.tsmdtc_field);
 
 		mViewVIN.setSoundEffectsEnabled(false);
 		mViewVIN.setOnClickListener(this);
-		mViewCurrentDTC.setSoundEffectsEnabled(false);
-		mViewHistoricDTC.setSoundEffectsEnabled(false);
-		mViewCurrentDTC.setOnItemClickListener(this);
-		mViewHistoricDTC.setOnItemClickListener(this);
+		bindDtcList(mViewEcmDtc);
+		bindDtcList(mViewAbsDtc);
+		bindDtcList(mViewTsmDtc);
+	}
+
+	private void bindDtcList(ListView list) {
+		if (list == null) return;
+		list.setSoundEffectsEnabled(false);
+		list.setOnItemClickListener(this);
 	}
 
 	public void handleMessage(Message msg) {
@@ -129,12 +128,18 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 		case UPDATE_ECMSWLEVEL:
 			drawECMSWLevel(msg.arg1);
 			break;
-		case UPDATE_HISTORICDTC:
-			drawHistoricDTC(msg.getData().getStringArray("historicdtc"));
+		case UPDATE_MODULE_DTC: {
+			String name = msg.getData().getString("module");
+			DtcModule module = null;
+			if (name != null) {
+				try {
+					module = DtcModule.valueOf(name);
+				} catch (IllegalArgumentException ignored) {
+				}
+			}
+			drawModuleDtc(module, msg.getData().getStringArray("dtc"));
 			break;
-		case UPDATE_CURRENTDTC:
-			drawCurrentDTC(msg.getData().getStringArray("currentdtc"));
-			break;
+		}
 		}
 	}
 
@@ -166,38 +171,30 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 		mHandler.obtainMessage(HarleyDroidDiagnosticsView.UPDATE_ECMSWLEVEL, ecmSWLevel, -1).sendToTarget();
 	}
 
-	public void onHistoricDTCChanged(String[] dtc) {
-		Message m = mHandler.obtainMessage(HarleyDroidDiagnosticsView.UPDATE_HISTORICDTC);
+	public void onModuleDtcChanged(DtcModule module, String[] dtc) {
+		Message m = mHandler.obtainMessage(HarleyDroidDiagnosticsView.UPDATE_MODULE_DTC);
 		Bundle b = new Bundle();
-		b.putStringArray("historicdtc", dtc);
-		m.setData(b);
-		m.sendToTarget();
-	}
-
-	public void onCurrentDTCChanged(String[] dtc) {
-		Message m = mHandler.obtainMessage(HarleyDroidDiagnosticsView.UPDATE_CURRENTDTC);
-		Bundle b = new Bundle();
-		b.putStringArray("currentdtc", dtc);
+		b.putString("module", module.name());
+		b.putStringArray("dtc", dtc);
 		m.setData(b);
 		m.sendToTarget();
 	}
 
 	public void drawAll(HarleyData hd) {
-
 		if (hd != null) {
 			drawVIN(hd.getVIN());
 			drawECMPN(hd.getECMPN());
 			drawECMCalID(hd.getECMCalID());
 			drawECMSWLevel(hd.getECMSWLevel());
-			drawHistoricDTC(hd.getHistoricDTC());
-			drawCurrentDTC(hd.getCurrentDTC());
+			for (DtcModule module : DtcModule.values())
+				drawModuleDtc(module, hd.getDtc(module));
 		} else {
 			drawVIN("");
 			drawECMPN("");
 			drawECMCalID("");
 			drawECMSWLevel(-1);
-			drawHistoricDTC(null);
-			drawCurrentDTC(null);
+			for (DtcModule module : DtcModule.values())
+				drawModuleDtc(module, null);
 		}
 	}
 
@@ -225,51 +222,41 @@ public class HarleyDroidDiagnosticsView implements HarleyDataDiagnosticsListener
 		}
 	}
 
-	public void drawHistoricDTC(String[] dtc) {
-		if (D) Log.d("DTC", "drawHistoric");
+	public void drawModuleDtc(DtcModule module, String[] dtc) {
+		if (module == null) return;
+		ListView list = listFor(module);
+		if (list == null) return;
 
-		if (mViewHistoricDTC == null)
-			return;
-
-		// arrayAdapter.notifyDataSetChanged();
 		ArrayList<String> items = new ArrayList<String>();
-		if (dtc != null)
+		if (dtc != null) {
 			for (int i = 0; i < dtc.length; i++)
 				items.add(dtc[i]);
+		}
 		if (items.isEmpty())
 			items.add(mActivity.getString(R.string.dtc_empty));
-		mViewHistoricDTC.setAdapter(new ArrayAdapter<String>(mActivity, R.layout.dtc_item, items));
+		list.setAdapter(new ArrayAdapter<String>(mActivity, R.layout.dtc_item, items));
 	}
 
-	public void drawCurrentDTC(String[] dtc) {
-		if (D) Log.d("DTC", "drawCurrent");
-
-		if (mViewCurrentDTC == null)
-			return;
-
-		ArrayList<String> items = new ArrayList<String>();
-		if (dtc != null)
-			for (int i = 0; i < dtc.length; i++)
-				items.add(dtc[i]);
-		if (items.isEmpty())
-			items.add(mActivity.getString(R.string.dtc_empty));
-		mViewCurrentDTC.setAdapter(new ArrayAdapter<String>(mActivity, R.layout.dtc_item, items));
+	private ListView listFor(DtcModule module) {
+		switch (module) {
+		case ECM: return mViewEcmDtc;
+		case ABS: return mViewAbsDtc;
+		case TSM: return mViewTsmDtc;
+		default: return null;
+		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> adapter, View view, int pos, long id) {
-		Resources res = mActivity.getResources();
 		String dtc = ((TextView)view).getText().toString();
-		String[] dtcCodes = res.getStringArray(R.array.dtc_codes);
-		String[] dtcStrings = res.getStringArray(R.array.dtc_strings);
-
-		if (D) Log.i(TAG, "Clicked on [" + ((TextView)view).getText() + "]");
-		for (int i = 0; i < dtcCodes.length; ++i) {
-			if (dtc.equals(dtcCodes[i])) {
-				Toast.makeText(mActivity.getApplicationContext(), dtcStrings[i], Toast.LENGTH_SHORT).show();
-				break;
-			}
-		}
+		if (dtc.equals(mActivity.getString(R.string.dtc_empty)))
+			return;
+		if (D) Log.i(TAG, "Clicked on [" + dtc + "]");
+		Toast.makeText(
+			mActivity.getApplicationContext(),
+			DtcDescriptions.lookupOrUnknown(mActivity, dtc),
+			Toast.LENGTH_LONG
+		).show();
 	}
 
 	@Override

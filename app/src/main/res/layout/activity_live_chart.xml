@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/live_chart_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/hd_surface"
+    android:orientation="vertical">
+
+    <!-- Content only: shell provides the toolbar -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_12"
+        android:paddingTop="@dimen/space_12"
+        android:paddingEnd="@dimen/space_12"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/live_chips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:chipSpacingHorizontal="@dimen/space_8"
+            app:singleLine="true"
+            app:singleSelection="false" />
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/live_legend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_12"
+        android:layout_marginTop="@dimen/space_8"
+        android:layout_marginEnd="@dimen/space_12"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Label"
+        android:textColor="@color/hd_on_surface_60" />
+
+    <TextView
+        android:id="@+id/live_readout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_12"
+        android:layout_marginTop="@dimen/space_8"
+        android:layout_marginEnd="@dimen/space_12"
+        android:fontFeatureSettings="tnum"
+        android:textAppearance="@style/TextAppearance.HarleyDroid.Value"
+        android:textColor="@color/hd_on_surface" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/space_12"
+        android:layout_weight="1"
+        android:background="@drawable/bg_section_card"
+        android:padding="@dimen/space_8">
+
+        <org.harleydroid.LogChartView
+            android:id="@+id/live_chart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+</LinearLayout>

@@ -16,6 +16,9 @@
         android:icon="@drawable/ic_menu_clear_playlist"
         android:title="@string/cleardtc_label" />
     <item
+        android:id="@+id/logs_menu"
+        android:title="@string/logs_label" />
+    <item
         android:id="@+id/export_logs_menu"
         android:title="@string/export_logs_label" />
     <item

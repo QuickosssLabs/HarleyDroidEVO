@@ -24,6 +24,32 @@
 <string name="dashboard_name">HarleyDroidEVO</string>
 <string name="diagnostics_name">Diagnostics</string>
 <string name="settings_name">Settings</string>
+<string name="logs_name">Logs</string>
+<string name="logs_label">View logs</string>
+<string name="live_chart_name">Live graph</string>
+<string name="live_chart_label">Live graph</string>
+<string name="live_chart_waiting">Connect to stream live data…</string>
+<string name="live_chart_readout_dual">%1$s · %2$s</string>
+<string name="live_chart_readout_single">%1$s</string>
+<string name="logs_empty">No log files yet.\nEnable logging in settings, then ride with the dashboard connected.</string>
+<string name="logs_item_meta">%1$s · %2$s · %3$s · %4$s</string>
+<string name="logs_share">Share</string>
+<string name="logs_delete">Delete</string>
+<string name="logs_delete_title">Delete log?</string>
+<string name="logs_delete_message">Delete %1$s permanently?</string>
+<string name="logs_delete_failed">Could not delete log</string>
+<string name="logs_open_failed">Could not open log</string>
+<string name="logs_chart_legend">Solid = RPM · Dashed = Speed</string>
+<string name="logs_chart_legend_hint">Select up to 2 metrics</string>
+<string name="logs_chart_legend_dual">Solid = %1$s · Dashed = %2$s</string>
+<string name="logs_chart_legend_single">Solid = %1$s</string>
+<string name="logs_chart_hint">Loading…</string>
+<string name="logs_chart_empty">No chartable samples in this log</string>
+<string name="logs_chart_summary">Duration %1$s · Max RPM %2$s · Max SPD %3$s\nDrag on the chart to scrub</string>
+<string name="logs_chart_summary_full">Duration %1$s · Max RPM %2$s · Max SPD %3$s · Max ETP %4$s · Trip %5$s\nDrag on the chart to scrub</string>
+<string name="logs_chart_scrub">t %1$s · RPM %2$s · SPD %3$s</string>
+<string name="logs_chart_scrub_dual">t %1$s · %2$s · %3$s</string>
+<string name="logs_chart_scrub_single">t %1$s · %2$s</string>
 
 <string name="toast_nobluetooth">Sorry, your device doesn\'t support bluetooth</string>
 <string name="toast_errorenablebluetooth">Unable to enable Bluetooth</string>
@@ -92,7 +118,11 @@
 <string name="resetcounters_label">Reset</string>
 <string name="about_label">About</string>
 
-<string name="cleardtc_label">Clear historic DTC</string>
+<string name="cleardtc_label">Clear stored DTCs</string>
+<string name="cleardtc_dialog_title">Clear fault codes</string>
+<string name="cleardtc_dialog_message">Choose which modules to clear. Codes are erased on the bike, then diagnostics re-scan.</string>
+<string name="cleardtc_confirm">Clear</string>
+<string name="cleardtc_none_selected">Select at least one module</string>
 
 <string name="notification_label">HarleyDroidEVO</string>
 <string name="notification_connecting">Connecting&#8230;</string>
@@ -252,7 +282,12 @@
 <string name="privacy_note">HarleyDroidEVO uses Bluetooth or local WiFi/TCP to talk to your ELM327 interface and optional GPS only when logging is enabled.</string>
 <string name="dtc_current_title">Current DTCs</string>
 <string name="dtc_historic_title">Historic DTCs</string>
+<string name="dtc_module_ecm">ECM</string>
+<string name="dtc_module_abs">ABS</string>
+<string name="dtc_module_tsm">TSM / TSSM</string>
 <string name="dtc_empty">No fault codes</string>
+<string name="dtc_unknown_desc">Unknown fault code</string>
+<string name="dtc_unknown_desc_fmt">%1$s — unknown description</string>
 <string name="vin_tap_hint">Tap VIN for details</string>
 
 </resources>

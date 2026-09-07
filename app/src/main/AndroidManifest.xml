@@ -70,6 +70,25 @@
             android:exported="false"
             android:label="@string/settings_name" />
 
+        <activity
+            android:name=".HarleyDroidLogs"
+            android:exported="false"
+            android:label="@string/logs_name" />
+
+        <activity
+            android:name=".HarleyDroidLogChart"
+            android:exported="false"
+            android:label="@string/logs_name"
+            android:screenOrientation="unspecified" />
+
+        <activity
+            android:name=".HarleyDroidLiveChart"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"
+            android:label="@string/live_chart_name"
+            android:launchMode="singleTop"
+            android:screenOrientation="unspecified" />
+
         <service
             android:name=".HarleyDroidService"
             android:exported="false"
