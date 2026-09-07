@@ -3,34 +3,34 @@ plugins {
 }
 
 android {
-    namespace 'org.harleydroid'
-    compileSdk 35
+    namespace = 'org.harleydroid'
+    compileSdk = 35
 
     defaultConfig {
-        applicationId "org.harleydroid"
-        minSdk 21
-        targetSdk 35
-        versionCode 13
-        versionName "3.2.1-EVO"
+        applicationId = "org.harleydroid"
+        minSdk = 21
+        targetSdk = 35
+        versionCode = 13
+        versionName = "3.2.1-EVO"
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
+            minifyEnabled = false
         }
     }
 
     lint {
-        abortOnError false
+        abortOnError = false
     }
 
     testOptions {
