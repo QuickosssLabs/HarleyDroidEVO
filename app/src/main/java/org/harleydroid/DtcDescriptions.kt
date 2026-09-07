@@ -16,6 +16,7 @@ import android.content.Context
 
 object DtcDescriptions {
 
+    @JvmStatic
     fun lookup(context: Context, code: String): String? {
         val codes = context.resources.getStringArray(R.array.dtc_codes)
         val strings = context.resources.getStringArray(R.array.dtc_strings)
@@ -26,6 +27,7 @@ object DtcDescriptions {
         return null
     }
 
+    @JvmStatic
     fun lookupOrUnknown(context: Context, code: String): String =
         lookup(context, code) ?: context.getString(R.string.dtc_unknown_desc_fmt, code)
 }
