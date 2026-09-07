@@ -108,6 +108,26 @@ class HarleyCanParseTest {
 		assertEquals(0x64, frame.second[1].toInt() and 0xff)
 	}
 
+	/** Regression: absolute CAN odo + small fuel must not ArithmeticException (/0). */
+	@Test
+	fun absoluteOdoWithSmallFuelDoesNotCrashAverage() {
+		assertTrue(HarleyCan.parse("5C0#0000000047F4".toByteArray(), data)) // 18420 km
+		assertEquals(18420, data.getOdometerMetric())
+		data.setFuel(1)
+		assertEquals(-1, data.getFuelAverageMetric())
+		assertEquals(-1, data.getFuelAverageImperial())
+	}
+
+	@Test
+	fun absoluteOdoUsesTripForFuelAverage() {
+		data.setOdometerAbsolute(18420 * 25)
+		data.setFuel(0)
+		data.setOdometerAbsolute(18421 * 25) // +1 km trip
+		data.setFuel(13) // ~6.5 L/100km raw units
+		assertEquals(650, data.getFuelAverageMetric())
+		assertTrue(data.getFuelAverageImperial() > 0)
+	}
+
 	private class MemPrefs : SharedPreferences {
 		private val map = HashMap<String, Any?>()
 		override fun getAll(): MutableMap<String, *> = map

@@ -319,9 +319,9 @@ public class EmulatorInterface implements J1850Interface
 						errors = 0;
 					else
 						++errors;
+					// Odo display comes from absolute CAN frame (5C0); do not overwrite
+					// with session pulses — that broke economy math and the odo reading.
 					mHD.setFuel(fuelPulse);
-					// Prefer session odo for consumption math; CAN absolute also updated via frame
-					mHD.setOdometer(odoSession);
 					mHD.setFuelGauge(ride.fuelBars, ride.fuelLow);
 					mHD.setTurnSignals(ride.turnSignals);
 					mHD.setCheckEngine(ride.checkEngine);

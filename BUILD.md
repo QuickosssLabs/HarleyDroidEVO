@@ -1,5 +1,5 @@
-HarleyDroid EVO 3.2
-===================
+HarleyDroid EVO 3.2.1
+=====================
 
 Open-source Harley-Davidson J1850 / CAN analyser for Android (ELM327 / HDI).
 Evolution of the original HarleyDroid — "EVO" refers to this continued
@@ -34,8 +34,8 @@ Publier une nouvelle version :
 2. Commit + push sur `main`.
 3. Créer et pousser un tag sémantique :
 
-       git tag v3.2-EVO
-       git push origin v3.2-EVO
+       git tag v3.2.1-EVO
+       git push origin v3.2.1-EVO
 
 4. Le workflow `.github/workflows/release.yml` compile l’APK et crée
    automatiquement la Release GitHub avec le fichier joint

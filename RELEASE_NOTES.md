@@ -1,4 +1,4 @@
-# HarleyDroid EVO 3.2 — Release notes
+# HarleyDroid EVO 3.2.1 — Release notes
 
 ## Summary
 
@@ -6,7 +6,13 @@ Open-source Harley-Davidson J1850 / CAN analyser for Android (ELM327 / HDI).
 Evolution of [stelian42/HarleyDroid](https://github.com/stelian42/HarleyDroid)
 with a modern Material UI, dual-bus support, log charts, and module-based DTCs.
 
-**APK:** `HarleyDroidEVO-v3.2-EVO-debug.apk` (sideload; debug signing).
+**APK:** `HarleyDroidEVO-v3.2.1-EVO-debug.apk` (sideload; debug signing).
+
+### 3.2.1
+- Fix crash in **CAN 6-pin simulation** (fuel average ÷0 with absolute odometer)
+- Economy uses CAN trip distance, not full bike odometer
+- AGP 9 cleanup: built-in Kotlin, drop deprecated gradle.properties opt-outs
+- `LogChartView` / live buffer hardening
 
 ### 3.2
 - In-app log browser + RPM/speed (and more) replay charts

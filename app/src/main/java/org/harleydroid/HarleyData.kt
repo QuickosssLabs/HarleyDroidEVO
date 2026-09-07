@@ -44,6 +44,8 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	private var mResetFuel = -1
 	private var mSavedOdometer = 0
 	private var mSavedFuel = 0
+	/** First absolute CAN odometer reading (raw units); trip = current − baseline. */
+	private var mAbsOdoBaseline = -1
 
 	private val mDashboardListeners = CopyOnWriteArrayList<HarleyDataDashboardListener>()
 	private val mDiagnosticsListeners = CopyOnWriteArrayList<HarleyDataDiagnosticsListener>()
@@ -237,8 +239,11 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	/**
 	 * Absolute odometer from CAN (bike total), not a session delta like J1850 pulses.
 	 * Units match [setOdometer] (metric display = units / 25).
+	 * Fuel average uses trip since the first absolute reading ([mAbsOdoBaseline]).
 	 */
 	fun setOdometerAbsolute(odometer: Int) {
+		if (mAbsOdoBaseline < 0)
+			mAbsOdoBaseline = odometer
 		if (mResetOdometer < 0)
 			mResetOdometer = 0
 		if (mOdometer != odometer || mResetOdometer != 0) {
@@ -250,6 +255,17 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 				l.onOdometerMetricChanged(o / 25)
 			}
 		}
+	}
+
+	/**
+	 * Odometer distance used for fuel economy (km-equivalent display units).
+	 * J1850: session (+ saved) via [getOdometerMetric].
+	 * CAN absolute: trip since first [setOdometerAbsolute] (not full bike total).
+	 */
+	fun getEconomyOdometerMetric(): Int {
+		if (mAbsOdoBaseline >= 0)
+			return ((mOdometer - mAbsOdoBaseline) / 25).coerceAtLeast(0)
+		return getOdometerMetric()
 	}
 
 	fun getFuelImperial(): Int {
@@ -292,21 +308,25 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 				l.onFuelImperialChanged((f * 264) / 20000)
 				l.onFuelMetricChanged(f / 20)
 			}
-			if (getOdometerMetric() != 0 && f != 0)
-				setFuelAverage((50 * f) / getOdometerMetric())
-			else
+			val odo = getEconomyOdometerMetric()
+			if (odo > 0 && f != 0) {
+				val avg = (50 * f) / odo
+				setFuelAverage(if (avg > 0) avg else -1)
+			} else {
 				setFuelAverage(-1)
+			}
 		}
 	}
 
 	fun getFuelAverageImperial(): Int =
-		if (mFuelAverage == -1) -1 else 2352146 / mFuelAverage
+		if (mFuelAverage <= 0) -1 else 2352146 / mFuelAverage
 
 	fun getFuelAverageMetric(): Int = mFuelAverage
 
 	private fun setFuelAverage(fuel: Int) {
-		if (mFuelAverage != fuel) {
-			mFuelAverage = fuel
+		val normalized = if (fuel <= 0) -1 else fuel
+		if (mFuelAverage != normalized) {
+			mFuelAverage = normalized
 			for (l in mDashboardListeners) {
 				if (mFuelAverage == -1)
 					l.onFuelAverageImperialChanged(-1)
@@ -318,13 +338,14 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 	}
 
 	fun getFuelInstantImperial(): Int =
-		if (mFuelInstant == -1) -1 else 2352146 / mFuelInstant
+		if (mFuelInstant <= 0) -1 else 2352146 / mFuelInstant
 
 	fun getFuelInstantMetric(): Int = mFuelInstant
 
 	private fun setFuelInstant(fuel: Int) {
-		if (mFuelInstant != fuel) {
-			mFuelInstant = fuel
+		val normalized = if (fuel <= 0) -1 else fuel
+		if (mFuelInstant != normalized) {
+			mFuelInstant = normalized
 			for (l in mDashboardListeners) {
 				if (mFuelInstant == -1)
 					l.onFuelInstantImperialChanged(-1)
@@ -340,6 +361,7 @@ class HarleyData(private val mPrefs: SharedPreferences) {
 		mSavedFuel = 0
 		mResetOdometer = -1
 		mResetFuel = -1
+		mAbsOdoBaseline = -1
 		for (l in mDashboardListeners) {
 			l.onOdometerImperialChanged(0)
 			l.onOdometerMetricChanged(0)

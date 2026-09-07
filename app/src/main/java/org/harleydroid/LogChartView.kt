@@ -19,6 +19,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -252,5 +253,6 @@ class LogChartView @JvmOverloads constructor(
         else "%.1f".format(Locale.US, v)
 
     private fun dp(v: Float): Float = v * resources.displayMetrics.density
-    private fun sp(v: Float): Float = v * resources.displayMetrics.scaledDensity
+    private fun sp(v: Float): Float =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, v, resources.displayMetrics)
 }

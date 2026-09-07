@@ -9,7 +9,7 @@ Evolution (EVO) engine.
   <img src="docs/screenshots/dashboard-simulation-landscape.png" alt="Dashboard gauges in simulation (landscape)" width="720">
 </p>
 
-**Version:** 3.2-EVO · targetSdk / compileSdk 35 · minSdk 21  
+**Version:** 3.2.1-EVO · targetSdk / compileSdk 35 · minSdk 21  
 **APK downloads:** [GitHub Releases](https://github.com/QuickosssLabs/HarleyDroidEVO/releases)  
 **Build notes:** [BUILD.md](BUILD.md) · **Release notes:** [RELEASE_NOTES.md](RELEASE_NOTES.md)
 

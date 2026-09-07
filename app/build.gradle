@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -11,17 +10,13 @@ android {
         applicationId "org.harleydroid"
         minSdk 21
         targetSdk 35
-        versionCode 12
-        versionName "3.2-EVO"
+        versionCode 13
+        versionName "3.2.1-EVO"
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = '17'
     }
 
     buildTypes {
