@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
+import java.util.Locale
 import kotlin.math.max
 
 /**
