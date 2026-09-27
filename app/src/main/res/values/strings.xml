@@ -130,7 +130,7 @@
 <string name="elm_diag_banner">ELM: %1$s</string>
 <string name="elm_diag_voltage">Voltage (ATRV): %1$s</string>
 <string name="elm_diag_protocol">Protocol (ATDP): %1$s</string>
-<string name="elm_diag_atma_count">ATMA lines in 5s: %1$d</string>
+<string name="elm_diag_atma_count">ATMA bus lines in 5s: %1$d</string>
 <string name="elm_diag_unknown">—</string>
 <string name="elm_diag_verdict_emulator">Simulation mode</string>
 <string name="elm_diag_verdict_not_configured">Not configured</string>
@@ -145,8 +145,8 @@
 <string name="elm_diag_advice_link_fail">TCP/Bluetooth could not open. On WiFi: stay on the ELM AP and disable mobile data. Check IP 192.168.0.10 and port 35000.</string>
 <string name="elm_diag_advice_at_fail">Socket opened but no ELM327 banner. Wrong device, busy port, or non-ELM firmware.</string>
 <string name="elm_diag_advice_power_low">ATRV is under 9 V — check +12V / ground on the diagnostic cable and bike power (ignition).</string>
-<string name="elm_diag_advice_bus_silent">ELM answers AT commands but ATMA saw no frames. Typical causes: ignition off, wrong bus type (4-pin J1850 vs 6-pin CAN), bad data pin wiring, or a clone that fakes OK without real J1850/CAN monitor.</string>
-<string name="elm_diag_advice_bus_noise">Lines arrived but none look like hex frames. Check bus type and that the dongle supports your protocol.</string>
+<string name="elm_diag_advice_bus_silent">ELM answers AT commands but ATMA saw no bus frames. If the log only shows the &gt;ATMA echo, check ignition, J1850/CAN selection, data-wire continuity, and whether the dongle really monitors this bus.</string>
+<string name="elm_diag_advice_bus_noise">Non-ELM lines arrived but none look like hex frames. Check bus type, common ground, data wire, and that the dongle supports your protocol.</string>
 <string name="elm_diag_advice_bus_ok">The adapter is seeing bus frames. If the dashboard still shows nothing, share this log — decoding may need calibration for your model/year.</string>
 
 <string name="cleardtc_label">Clear stored DTCs</string>

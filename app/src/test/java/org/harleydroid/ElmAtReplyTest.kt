@@ -12,6 +12,8 @@ class ElmAtReplyTest {
         assertTrue(ElmAtReply.isStatusLine("BUFFER FULL"))
         assertTrue(ElmAtReply.isStatusLine("STOPPED"))
         assertTrue(ElmAtReply.isStatusLine("ATMA"))
+        assertTrue(ElmAtReply.isStatusLine(">ATMA"))
+        assertTrue(ElmAtReply.isStatusLine("> ATDP"))
         assertTrue(ElmAtReply.isStatusLine("ELM327 v1.5"))
         assertFalse(ElmAtReply.isStatusLine("28 1B 10 02 0F A0 D7"))
     }

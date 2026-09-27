@@ -174,6 +174,21 @@ Harley data port          16 pin J1979 connector (ELM327)
 
 Optional: HDI interface (J1850 only).
 
+Quick data-wire checks before blaming the app:
+
+1. With bike power off, verify continuity from Harley pin 3 (green data wire) to
+   OBD pin 2. It should not be shorted to ground or +12 V.
+2. Verify Harley pin 2 and OBD pins 4/5 share ground, and Harley pin 4 feeds OBD
+   pin 16 with battery voltage when expected.
+3. With ignition on, measure OBD pin 2 against ground. J1850 VPW is a single-wire
+   bus; a basic multimeter usually shows an average voltage only, but it should
+   not be stuck at 0 V or battery voltage. A scope or logic probe should show
+   short pulses around the J1850 idle level when modules talk.
+4. If the ELM log only shows the `ATMA` echo and no hex frames, the socket and AT
+   side work, but the adapter is not seeing J1850 traffic on pin 2. Re-check the
+   data pin, ignition/run switch state, and that the dongle genuinely supports
+   SAE J1850 VPW monitoring.
+
 ### CAN / HDLAN — 6-pin Deutsch (newer bikes)
 
 - Deutsch 6-pin diagnostic port + cable to an ELM327 with CAN support

@@ -17,7 +17,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import java.io.IOException
 import java.util.concurrent.TimeoutException
-import java.util.Locale
 import java.util.regex.Pattern
 
 /**
@@ -192,6 +191,7 @@ object ElmLinkProbe {
             }
 
             val samples = ArrayList<String>()
+            var ignoredStatusLines = 0
             val deadline = System.currentTimeMillis() + ATMA_LISTEN_MS
             while (System.currentTimeMillis() < deadline) {
                 val remaining = deadline - System.currentTimeMillis()
@@ -199,6 +199,11 @@ object ElmLinkProbe {
                 try {
                     val l = sock.readLine(remaining.coerceAtMost(1_000L)).trim()
                     if (l.isEmpty() || l == ">") continue
+                    if (isElmStatusLine(l)) {
+                        ignoredStatusLines++
+                        if (ignoredStatusLines <= 6) line("  « $l »")
+                        continue
+                    }
                     samples.add(l)
                     if (samples.size <= 12) line("  « $l »")
                 } catch (_: TimeoutException) {
@@ -214,12 +219,15 @@ object ElmLinkProbe {
             }
 
             line("ATMA lines: ${samples.size}")
+            if (ignoredStatusLines > 0) {
+                line("ELM/status lines ignored: $ignoredStatusLines")
+            }
 
             val frameLike = samples.count { looksLikeBusFrame(it) }
             val finalVerdict = when {
                 voltageVolts != null && voltageVolts < 9.0 -> Verdict.POWER_LOW
                 frameLike > 0 -> Verdict.BUS_OK
-                samples.isEmpty() || samples.all { isElmStatusLine(it) } -> Verdict.BUS_SILENT
+                samples.isEmpty() -> Verdict.BUS_SILENT
                 else -> Verdict.BUS_NOISE
             }
 
@@ -254,11 +262,7 @@ object ElmLinkProbe {
     }
 
     private fun isElmStatusLine(line: String): Boolean {
-        val u = line.uppercase(Locale.US)
-        return u == "OK" || u == "SEARCHING..." || u == "SEARCHING…" ||
-            u == "UNABLE TO CONNECT" || u == "NO DATA" || u == "STOPPED" ||
-            u == "BUS INIT..." || u == "BUS INIT…" || u == "?" || u == "ERROR" ||
-            u.startsWith("ELM327")
+        return ElmAtReply.isStatusLine(line)
     }
 
     private fun looksLikeBusFrame(line: String): Boolean {
