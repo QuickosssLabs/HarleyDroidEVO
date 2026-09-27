@@ -130,7 +130,7 @@
 <string name="elm_diag_banner">ELM : %1$s</string>
 <string name="elm_diag_voltage">Tension (ATRV) : %1$s</string>
 <string name="elm_diag_protocol">Protocole (ATDP) : %1$s</string>
-<string name="elm_diag_atma_count">Lignes ATMA en 5 s : %1$d</string>
+<string name="elm_diag_atma_count">Lignes bus ATMA en 5 s : %1$d</string>
 <string name="elm_diag_unknown">—</string>
 <string name="elm_diag_verdict_emulator">Mode simulation</string>
 <string name="elm_diag_verdict_not_configured">Non configuré</string>
@@ -145,8 +145,8 @@
 <string name="elm_diag_advice_link_fail">TCP/Bluetooth n\'a pas pu s\'ouvrir. En WiFi : restez sur le AP ELM et coupez les données mobiles. Vérifiez IP 192.168.0.10 et port 35000.</string>
 <string name="elm_diag_advice_at_fail">Socket ouvert mais pas de bannière ELM327. Mauvais appareil, port occupé, ou firmware non ELM.</string>
 <string name="elm_diag_advice_power_low">ATRV &lt; 9 V — vérifiez +12V / masse du câble diag et l\'alimentation moto (contact).</string>
-<string name="elm_diag_advice_bus_silent">L\'ELM répond aux AT mais ATMA n\'a vu aucune trame. Causes typiques : contact coupé, mauvais type de bus (J1850 4 pins vs CAN 6 pins), mauvais fil data, ou clone qui répond OK sans vrai moniteur J1850/CAN.</string>
-<string name="elm_diag_advice_bus_noise">Des lignes arrivent mais aucune ne ressemble à des trames hex. Vérifiez le type de bus et que le dongle gère votre protocole.</string>
+<string name="elm_diag_advice_bus_silent">L\'ELM répond aux AT mais ATMA n\'a vu aucune trame bus. Si le journal ne montre que l\'écho &gt;ATMA, contrôlez le contact, le choix J1850/CAN, la continuité du fil data et la capacité réelle du dongle à monitorer ce bus.</string>
+<string name="elm_diag_advice_bus_noise">Des lignes non-ELM arrivent mais aucune ne ressemble à des trames hex. Vérifiez le type de bus, la masse commune, le fil data et que le dongle gère votre protocole.</string>
 <string name="elm_diag_advice_bus_ok">L\'adaptateur voit des trames bus. Si le tableau de bord reste vide, partagez ce journal — le décodage peut nécessiter un calibrage modèle/année.</string>
 
 <string name="cleardtc_label">Effacer les codes défaut</string>

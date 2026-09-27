@@ -20,8 +20,9 @@ object ElmAtReply {
     @JvmStatic
     fun isStatusLine(line: String?): Boolean {
         if (line.isNullOrBlank()) return true
-        val u = line.trim().uppercase(Locale.US)
-        if (u == ">" || u == "OK" || u == "?" || u == "ERROR") return true
+        val u = normalize(line)
+        if (u.isEmpty()) return true
+        if (u == "OK" || u == "?" || u == "ERROR") return true
         if (u == "STOPPED" || u == "NO DATA" || u == "UNABLE TO CONNECT") return true
         if (u.startsWith("SEARCHING") || u.startsWith("BUS INIT")) return true
         if (u.startsWith("ELM327") || u.startsWith("AT")) return true
@@ -33,7 +34,15 @@ object ElmAtReply {
     @JvmStatic
     fun needsAtmaRestart(line: String?): Boolean {
         if (line.isNullOrBlank()) return false
-        val u = line.trim().uppercase(Locale.US)
+        val u = normalize(line)
         return u.startsWith("BUFFER") || u == "STOPPED"
+    }
+
+    private fun normalize(line: String): String {
+        var u = line.trim().uppercase(Locale.US)
+        while (u.startsWith(">")) {
+            u = u.substring(1).trimStart()
+        }
+        return u
     }
 }
