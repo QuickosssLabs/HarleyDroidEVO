@@ -22,6 +22,9 @@
         android:id="@+id/export_logs_menu"
         android:title="@string/export_logs_label" />
     <item
+        android:id="@+id/elm_diag_menu"
+        android:title="@string/elm_diag_label" />
+    <item
         android:id="@+id/preferences_menu"
         android:icon="@drawable/ic_menu_preferences"
         android:title="@string/preferences_label" />

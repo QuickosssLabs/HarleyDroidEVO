@@ -268,6 +268,7 @@ public class ELM327Interface implements J1850Interface
 
 		public void run() {
 			int errors = 0;
+			int atmaRestarts = 0;
 
 			setName("ELM327Interface: PollThread");
 			try {
@@ -288,9 +289,34 @@ public class ELM327Interface implements J1850Interface
 				try {
 					line = mSock.readLine(ATMA_TIMEOUT);
 				} catch (TimeoutException e1) {
+					// Clones often stall ATMA after a burst — try one clean restart.
+					if (!stop && atmaRestarts < 2 && restartAtma()) {
+						atmaRestarts++;
+						errors = 0;
+						continue;
+					}
 					if (!stop)
 						mHarleyDroidService.disconnected(HarleyDroid.STATUS_NODATA);
 					if (mSock != null) {
+						mSock.close();
+						mSock = null;
+					}
+					return;
+				}
+
+				if (ElmAtReply.needsAtmaRestart(line)) {
+					if (atmaRestarts < 3 && restartAtma()) {
+						atmaRestarts++;
+						errors = 0;
+						continue;
+					}
+					// Gave up restarting — fall through as a hard failure.
+					mHarleyDroidService.disconnected(HarleyDroid.STATUS_TOOMANYERRORS);
+					if (mSock != null) {
+						try {
+							mSock.writeLine("");
+						} catch (IOException e1) {
+						}
 						mSock.close();
 						mSock = null;
 					}
@@ -318,6 +344,22 @@ public class ELM327Interface implements J1850Interface
 			try {
 				mSock.writeLine("");
 			} catch (IOException e1) {
+			}
+		}
+
+		/** Interrupt ATMA and start a fresh monitor (returns false if the socket is dead). */
+		private boolean restartAtma() {
+			if (mSock == null) return false;
+			try {
+				mSock.writeLine("");
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
+				}
+				mSock.writeLine("ATMA");
+				return true;
+			} catch (IOException e) {
+				return false;
 			}
 		}
 

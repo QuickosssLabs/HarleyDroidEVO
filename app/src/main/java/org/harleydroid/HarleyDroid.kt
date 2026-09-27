@@ -636,6 +636,12 @@ abstract class HarleyDroid : AppCompatActivity(), ServiceConnection, Eula.OnEula
         invalidateOptionsMenu()
     }
 
+    /** Stops an active capture if needed, then runs the standalone ELM AT probe dialog. */
+    protected fun launchElmLinkDiag() {
+        if (mService != null) stopHDS()
+        ElmLinkDiag.show(this)
+    }
+
     class HarleyDroidHandler(activity: HarleyDroid) : Handler(Looper.getMainLooper()) {
         private val ref = WeakReference(activity)
         override fun handleMessage(msg: Message) {

@@ -87,7 +87,16 @@ object J1850 {
 
 	@JvmStatic
 	fun parse(buffer: ByteArray, hd: HarleyData): Boolean {
+		val rawLine = String(buffer).trim()
+		// ELM327 status / echo must not count as CRC failures (see ElmAtReply).
+		if (ElmAtReply.isStatusLine(rawLine)) return true
+
 		val `in` = bytes_to_hex(buffer)
+
+		if (`in`.isEmpty()) {
+			hd.setUnknown(buffer)
+			return true
+		}
 
 		if (crc(`in`) != 0xc4.toByte()) {
 			hd.setBadCRC(buffer)

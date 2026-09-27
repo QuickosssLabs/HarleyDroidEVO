@@ -48,6 +48,8 @@ jobs:
 
             ### Highlights
 
+            - **Test liaison ELM** : ATRV / ATDP / ATMA + verdict (menu ⋮)
+            - Poller ATMA plus robuste (BUFFER FULL / silence / bruit ELM)
             - Logs in-app : liste, replay graphique (RPM / vitesse / …), scrub
             - Graphique live (~60 s) pendant la connexion
             - Diagnostics J1850 par module (ECM / ABS / TSM) + clear sélectif

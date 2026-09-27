@@ -161,6 +161,10 @@ class HarleyDroidDashboard : HarleyDroid() {
                 LogExporter.shareLatestLog(this)
                 return true
             }
+            R.id.elm_diag_menu -> {
+                launchElmLinkDiag()
+                return true
+            }
             R.id.about_menu -> {
                 About.about(this)
                 return true

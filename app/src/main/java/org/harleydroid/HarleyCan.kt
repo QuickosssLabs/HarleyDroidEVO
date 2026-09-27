@@ -77,13 +77,7 @@ object HarleyCan {
 		val line = String(buffer).trim()
 		if (line.isEmpty()) return false
 		// Ignore ELM chatter
-		val upper = line.uppercase()
-		if (upper.startsWith("SEARCHING") || upper == "OK" || upper.startsWith("ELM") ||
-			upper.startsWith("AT") || upper == "?" || upper.startsWith("BUFFER") ||
-			upper.startsWith("BUS") || upper.startsWith("STOPPED")
-		) {
-			return true
-		}
+		if (ElmAtReply.isStatusLine(line)) return true
 
 		val parsed = parseFrame(line) ?: run {
 			hd.setUnknown(buffer)
